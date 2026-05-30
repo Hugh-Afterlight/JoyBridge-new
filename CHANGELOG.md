@@ -1,5 +1,79 @@
 # Changelog
 
+## v0.10.0-refactor - 2026-05-31
+
+### English
+
+This entry records the JoyBridge-new refactor MVP prepared in the new public repository `Hugh-Afterlight/JoyBridge-new`. The app version remains `v0.10.0`; the installed test app is now named `JoyBridge-new.app` with bundle id `cc.afterlight.JoyBridgeNew`, so it can be authorized separately from older JoyBridge builds.
+
+Changed:
+
+- Created the JoyBridge-new refactor implementation in a separate repository, keeping the original JoyBridge repository untouched.
+- Renamed the test app product to `JoyBridge-new.app` and changed the bundle id to `cc.afterlight.JoyBridgeNew`.
+- Added stable domain models for mapping profiles, mapping catalogs, controller input events, runtime state, and controller device identity.
+- Added persistence boundaries with `MappingStore`, `UserDefaultsMappingStore`, and `TargetControllerStore`.
+- Split the input/output path into `ControllerInputHandling`, `TargetControllerRule`, `MappingService`, and `KeyboardOutputService`.
+- Added `RuntimeState`, `DiagnosticReport`, and `DiagnosticsService` so readiness, diagnostics, and menu bar state share the same source of truth.
+- Reworked the main SwiftUI window around readiness, permission status, controller status, mappings, runtime control, and copyable diagnostics.
+- Added reusable UI components: `SectionPanel`, `StatusChip`, `KeyChip`, and `DiagnosticPanel`.
+- Updated menu bar behavior to show runtime status and provide pause/resume, show window, rescan controller, permission check, copy diagnostics, and quit actions.
+- Added standalone domain tests in `Tests/DomainMappingTests.swift` and `Scripts/run-domain-tests.sh`.
+- Updated README, friend testing instructions, release checklist, and package scripts for `JoyBridge-new`.
+- Generated a local friend-test package: `JoyBridge-new-v0.10.0-local-test.zip`.
+
+Validation:
+
+- `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -list -project JoyBridge.xcodeproj` succeeded and listed the `JoyBridge` target/scheme.
+- `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project JoyBridge.xcodeproj -scheme JoyBridge -configuration Debug -destination 'platform=macOS' build` succeeded.
+- `Scripts/run-domain-tests.sh` passed with `DomainMappingTests passed`.
+- `Scripts/package-local-release.sh v0.10.0` built the Release app and produced `dist/JoyBridge-new-v0.10.0-local-test.zip`.
+- `Scripts/check-release-readiness.sh v0.10.0 /private/tmp/JoyBridgeNewPackage-v0.10.0/JoyBridge-new.app` ran successfully with expected local-test warnings.
+- `codesign --verify --deep --strict` passed for the packaged app.
+- `git diff --check` passed.
+
+Known limitations:
+
+- This remains a local friend-test build, not a notarized public release.
+- The current package is Apple Silicon only.
+- Gatekeeper, Developer ID, notarization, and App Store distribution are intentionally out of scope for this refactor pass.
+- Users still need to manually approve opening the app and grant Accessibility permission to `JoyBridge-new.app`.
+
+### 中文
+
+这一条记录今天完成的 JoyBridge-new 重构 MVP。代码发布在新的公共仓库 `Hugh-Afterlight/JoyBridge-new`，原始 JoyBridge 仓库不做修改。App 版本仍是 `v0.10.0`；本轮测试 App 名称改为 `JoyBridge-new.app`，bundle id 改为 `cc.afterlight.JoyBridgeNew`，方便和旧版 JoyBridge 分开授权、分开测试。
+
+本次更新：
+
+- 在独立新仓库中完成 JoyBridge-new 重构实现，原 JoyBridge 仓库保持不动。
+- 将测试 App 产品名改为 `JoyBridge-new.app`，bundle id 改为 `cc.afterlight.JoyBridgeNew`。
+- 新增稳定领域模型：映射配置、映射目录、手柄输入事件、运行状态、手柄设备身份。
+- 新增持久化边界：`MappingStore`、`UserDefaultsMappingStore`、`TargetControllerStore`。
+- 将输入输出链路拆分为 `ControllerInputHandling`、`TargetControllerRule`、`MappingService`、`KeyboardOutputService`。
+- 新增 `RuntimeState`、`DiagnosticReport`、`DiagnosticsService`，让运行检查、诊断信息和菜单栏状态使用同一套状态来源。
+- 重整主窗口：运行检查、权限状态、手柄状态、映射配置、运行控制、诊断信息都在单窗口中可见。
+- 抽出复用 UI 组件：`SectionPanel`、`StatusChip`、`KeyChip`、`DiagnosticPanel`。
+- 更新菜单栏行为，支持状态显示、暂停/启用、显示窗口、重新检测手柄、检测权限、复制诊断信息和退出。
+- 新增独立领域测试：`Tests/DomainMappingTests.swift` 和 `Scripts/run-domain-tests.sh`。
+- 更新 README、朋友测试说明、发布检查清单和本地打包脚本，使其全部指向 `JoyBridge-new`。
+- 生成朋友测试包：`JoyBridge-new-v0.10.0-local-test.zip`。
+
+验证结果：
+
+- `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -list -project JoyBridge.xcodeproj` 通过，并能列出 `JoyBridge` target/scheme。
+- `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project JoyBridge.xcodeproj -scheme JoyBridge -configuration Debug -destination 'platform=macOS' build` 通过。
+- `Scripts/run-domain-tests.sh` 通过，输出 `DomainMappingTests passed`。
+- `Scripts/package-local-release.sh v0.10.0` 成功构建 Release app，并生成 `dist/JoyBridge-new-v0.10.0-local-test.zip`。
+- `Scripts/check-release-readiness.sh v0.10.0 /private/tmp/JoyBridgeNewPackage-v0.10.0/JoyBridge-new.app` 可运行，剩余 warning 都属于本地测试阶段预期。
+- 打包后的 App 通过 `codesign --verify --deep --strict`。
+- `git diff --check` 通过。
+
+已知限制：
+
+- 这仍然是本地朋友测试包，不是经过 Apple 公证的正式公开发行版。
+- 当前测试包仍是 Apple Silicon 架构。
+- Gatekeeper、Developer ID、公证、App Store 分发都不属于本轮重构范围。
+- 用户仍需要手动允许打开 App，并给 `JoyBridge-new.app` 授权辅助功能权限。
+
 ## v0.10.0 - 2026-05-11
 
 ### English
