@@ -1,0 +1,715 @@
+# Changelog
+
+## v0.10.0 - 2026-05-11
+
+### English
+
+This update focuses on the current goal: trusted local use by the owner and a few friends. It does not change controller mapping behavior.
+
+Changed:
+
+- Added `FRIEND_TESTING.md` with the shortest install, approval, Accessibility authorization, controller setup, testing, and feedback steps for non-programmer friends.
+- Updated the local package script so each zip includes `FRIEND_TESTING.md`.
+- Added package-version checks so the local package script stops if the requested package version does not match the app version.
+- Updated `READ-ME-FIRST.txt` package wording to point testers to `FRIEND_TESTING.md` first.
+- Updated in-app permission wording to `辅助功能权限（Accessibility）`.
+- Updated copied diagnostic text to a friend-ready Chinese summary.
+- Updated the visible test version and app bundle marketing version to `v0.10.0`.
+- Updated the app bundle build number to `10`.
+- Updated README and release checklist examples for `v0.10.0`.
+
+Validation:
+
+- Verified `Scripts/package-local-release.sh` and `Scripts/check-release-readiness.sh` with shell syntax checks.
+- Verified `JoyBridge.xcodeproj/project.pbxproj` with `plutil -lint`.
+- Built successfully with Xcode/macOS Debug target.
+- Ran the release-readiness checker for `v0.10.0`; remaining warnings are expected before a clean tag and Developer ID notarization setup.
+- Rebuilt the local test package with `Scripts/package-local-release.sh v0.10.0`.
+- Verified the zip includes `JoyBridge.app`, `FRIEND_TESTING.md`, `README.md`, `CHANGELOG.md`, `RELEASE_CHECKLIST.md`, `READ-ME-FIRST.txt`, and `Scripts/check-release-readiness.sh`.
+- Verified the built app bundle reports `CFBundleShortVersionString = 0.10.0` and `CFBundleVersion = 10`.
+
+Known limitations:
+
+- This is still a trusted local friend-test package, not a notarized public release.
+- Friends still need to approve the app in macOS and grant Accessibility permission manually.
+- JoyBridge still needs to be opened manually after Mac restart.
+
+### 中文
+
+本次更新聚焦当前目标：自己和少量信任朋友本地使用。本次不改变手柄映射行为。
+
+本次更新：
+
+- 新增 `FRIEND_TESTING.md`，用最短路径说明朋友如何安装、允许打开、授权辅助功能、连接手柄、测试和反馈问题。
+- 更新本地打包脚本，让每个 zip 都包含 `FRIEND_TESTING.md`。
+- 新增打包版本检查，如果传入的包版本和 App 版本不一致，脚本会停止，避免打错包。
+- 更新测试包内 `READ-ME-FIRST.txt` 的说明，引导测试者优先阅读 `FRIEND_TESTING.md`。
+- App 内权限文案统一为 `辅助功能权限（Accessibility）`。
+- `复制诊断信息` 改成更适合朋友直接发回来的中文摘要。
+- 可见测试版本和 App bundle marketing version 更新为 `v0.10.0`。
+- App bundle build number 更新为 `10`。
+- 更新 README 和发布检查清单中的 `v0.10.0` 示例。
+
+验证结果：
+
+- 已对 `Scripts/package-local-release.sh` 和 `Scripts/check-release-readiness.sh` 做 shell 语法检查。
+- 已用 `plutil -lint` 检查 `JoyBridge.xcodeproj/project.pbxproj`。
+- Xcode/macOS Debug 目标构建成功。
+- 已运行 `v0.10.0` 发布准备检查；clean tag 和 Developer ID 公证配置完成前，剩余警告属于预期状态。
+- 已用 `Scripts/package-local-release.sh v0.10.0` 重新生成本地测试包。
+- 确认 zip 内包含 `JoyBridge.app`、`FRIEND_TESTING.md`、`README.md`、`CHANGELOG.md`、`RELEASE_CHECKLIST.md`、`READ-ME-FIRST.txt` 和 `Scripts/check-release-readiness.sh`。
+- 确认构建后的 App bundle 显示 `CFBundleShortVersionString = 0.10.0`、`CFBundleVersion = 10`。
+
+已知限制：
+
+- 这仍然是可信朋友之间的本地测试包，不是经过 Apple 公证的正式公开发行版。
+- 朋友仍然需要在 macOS 中手动允许打开 App，并手动授权辅助功能权限。
+- Mac 重启后仍需要手动打开 JoyBridge。
+
+## v0.9.0 - 2026-05-11
+
+### English
+
+This update prepares JoyBridge for the next step toward a real installable macOS release. It does not change controller mapping behavior.
+
+Changed:
+
+- Added `RELEASE_CHECKLIST.md` with a plain-language path from local friend-test builds to future Developer ID signing and Apple notarization.
+- Added `Scripts/check-release-readiness.sh`, a read-only release checker for version consistency, git status, Xcode tools, Developer ID certificate presence, Hardened Runtime, App icon assets, and optional built-app checks.
+- Enabled Hardened Runtime for the Release configuration as a public distribution prerequisite.
+- Updated the visible test version and app bundle marketing version to `v0.9.0`.
+- Updated the app bundle build number to `9` for clearer release tracking.
+- Updated `Scripts/package-local-release.sh` so the local test package includes `RELEASE_CHECKLIST.md` and the optional read-only readiness checker.
+- Updated README package examples and release-readiness notes for `v0.9.0`.
+
+Validation:
+
+- Verified `Scripts/check-release-readiness.sh` and `Scripts/package-local-release.sh` with shell syntax checks.
+- Verified `JoyBridge.xcodeproj/project.pbxproj` with `plutil -lint`.
+- Built successfully with Xcode/macOS Debug target.
+- Ran the release-readiness checker for `v0.9.0`; remaining warnings are expected for local testing until Developer ID certificate and notarization credentials are configured.
+- Rebuilt the local test package with `Scripts/package-local-release.sh v0.9.0`.
+- Verified the zip includes `JoyBridge.app`, `README.md`, `CHANGELOG.md`, `RELEASE_CHECKLIST.md`, `READ-ME-FIRST.txt`, and `Scripts/check-release-readiness.sh`.
+- Verified the built app bundle reports `CFBundleShortVersionString = 0.9.0` and `CFBundleVersion = 9`.
+- Ran the release-readiness checker against the built app bundle; Hardened Runtime is present and local-test signing/notarization warnings are expected.
+
+Known limitations:
+
+- This is still a local friend-test package, not a notarized public release.
+- The local test package may still show expected release-readiness warnings such as missing Developer ID signing, missing notary profile, or missing stapled notarization ticket.
+- Actual public distribution still requires an Apple Developer Program membership, Developer ID certificates, notarization credentials, and a manual Apple notarization step.
+- Current builds are still focused on Apple Silicon unless a Universal build is added later.
+
+### 中文
+
+本次更新为 JoyBridge 后续变成真正可安装、可公开分发的 macOS App 做准备。本次不改变手柄映射行为。
+
+本次更新：
+
+- 新增 `RELEASE_CHECKLIST.md`，用简单语言说明从本地朋友测试包走向 Developer ID 签名和 Apple 公证需要做什么。
+- 新增 `Scripts/check-release-readiness.sh`，这是只读发布检查脚本，会检查版本一致性、git 状态、Xcode 工具、Developer ID 证书是否存在、Hardened Runtime、App 图标资源，以及可选的已构建 App 检查。
+- Release 配置启用 Hardened Runtime，这是后续公开分发的重要前提。
+- 可见测试版本和 App bundle marketing version 更新为 `v0.9.0`。
+- App bundle build number 更新为 `9`，方便后续版本追踪。
+- 更新 `Scripts/package-local-release.sh`，让本地测试包包含 `RELEASE_CHECKLIST.md` 和可选的只读发布检查脚本。
+- 更新 README 中的 `v0.9.0` 打包示例和发布准备说明。
+
+验证结果：
+
+- 已对 `Scripts/check-release-readiness.sh` 和 `Scripts/package-local-release.sh` 做 shell 语法检查。
+- 已用 `plutil -lint` 检查 `JoyBridge.xcodeproj/project.pbxproj`。
+- Xcode/macOS Debug 目标构建成功。
+- 已运行 `v0.9.0` 发布准备检查；在配置 Developer ID 证书和公证凭证前，剩余警告属于本地测试阶段的预期状态。
+- 已用 `Scripts/package-local-release.sh v0.9.0` 重新生成本地测试包。
+- 确认 zip 内包含 `JoyBridge.app`、`README.md`、`CHANGELOG.md`、`RELEASE_CHECKLIST.md`、`READ-ME-FIRST.txt` 和 `Scripts/check-release-readiness.sh`。
+- 确认构建后的 App bundle 显示 `CFBundleShortVersionString = 0.9.0`、`CFBundleVersion = 9`。
+- 已对构建后的 App bundle 运行发布准备检查；Hardened Runtime 存在，本地测试签名/公证相关警告符合预期。
+
+已知限制：
+
+- 这仍然是本地朋友测试包，不是经过 Apple 公证的正式公开发行版。
+- 当前本地测试包可能仍会出现一些预期内的发布检查警告，例如没有 Developer ID 签名、没有 notary profile、没有附加 Apple 公证票据。
+- 真正公开分发仍然需要 Apple Developer Program 会员资格、Developer ID 证书、公证凭证，以及手动执行 Apple 公证步骤。
+- 当前构建仍然优先面向 Apple Silicon，除非后续增加 Universal 构建。
+
+## v0.8.0 - 2026-05-11
+
+### English
+
+This update improves the installed app appearance by adding a real macOS App icon.
+
+Changed:
+
+- Added generated macOS AppIcon PNG assets for all required macOS icon sizes.
+- Replaced the empty AppIcon asset catalog entries with filename-backed macOS icon slots.
+- Added `Scripts/generate-app-icon.swift` so the icon set can be regenerated without third-party dependencies.
+- Updated the visible test version and app bundle marketing version to `v0.8.0`.
+- Updated README package examples and testing steps for icon verification.
+- Removed local personal signing settings from the shared project file so test packages can be built from a clean worktree.
+- Updated package wording to describe Xcode local test signing instead of assuming Apple Development signing.
+
+Validation:
+
+- Regenerated AppIcon PNG files with `Scripts/generate-app-icon.swift`.
+- Verified all generated AppIcon PNG pixel sizes with `sips`.
+- Built successfully with Xcode/macOS Debug target.
+- Verified Xcode generated `AppIcon.icns` and `Assets.car` during asset catalog compilation.
+- Rebuilt the local test package with `Scripts/package-local-release.sh v0.8.0`.
+- Verified the zip includes `JoyBridge.app`, `README.md`, `CHANGELOG.md`, and `READ-ME-FIRST.txt`.
+- Verified the built app bundle reports `CFBundleShortVersionString = 0.8.0`.
+- Verified the package source metadata reports tag `v0.8.0` and clean worktree.
+
+Known limitations:
+
+- This is still a local friend-test package, not a notarized public release.
+- The icon is a simple generated MVP icon and can be replaced by a polished designer-made icon later.
+
+### 中文
+
+本次更新改进安装后的 App 观感，新增真正的 macOS App 图标。
+
+本次更新：
+
+- 新增覆盖所有 macOS 必需尺寸的 AppIcon PNG 资源。
+- 将原本空的 AppIcon 资源槽位替换为带 `filename` 的 macOS 图标配置。
+- 新增 `Scripts/generate-app-icon.swift`，不用第三方依赖即可重新生成图标资源。
+- 可见测试版本和 App bundle marketing version 更新为 `v0.8.0`。
+- 更新 README 中的打包示例和图标验证步骤。
+- 移除共享项目文件里的本机个人签名设置，方便从 clean worktree 生成测试包。
+- 更新测试包说明，改为描述 Xcode 本地测试签名，不再假设一定使用 Apple Development 签名。
+
+验证结果：
+
+- 已用 `Scripts/generate-app-icon.swift` 重新生成 AppIcon PNG 文件。
+- 已用 `sips` 确认所有 AppIcon PNG 的像素尺寸正确。
+- Xcode/macOS Debug 目标构建成功。
+- 确认 Xcode 在资源编译时生成了 `AppIcon.icns` 和 `Assets.car`。
+- 已用 `Scripts/package-local-release.sh v0.8.0` 重新生成本地测试包。
+- 确认 zip 内包含 `JoyBridge.app`、`README.md`、`CHANGELOG.md` 和 `READ-ME-FIRST.txt`。
+- 确认构建后的 App bundle 显示 `CFBundleShortVersionString = 0.8.0`。
+- 确认测试包来源信息显示 tag `v0.8.0` 且工作区为 clean。
+
+已知限制：
+
+- 这仍然是本地朋友测试包，不是经过 Apple 公证的正式公开发行版。
+- 当前图标是简单生成的 MVP 图标，后续可以替换为更精修的设计版本。
+
+## v0.7.0 - 2026-05-11
+
+### English
+
+This update makes JoyBridge easier to test after installation, especially for non-programmer friends.
+
+Changed:
+
+- Added a top-level readiness check panel in the main window.
+- The readiness panel summarizes Accessibility permission, controller connection, target controller status, and mapping output status.
+- Added visible test version information in the main window and menu bar.
+- Updated the menu bar title/icon to reflect important states such as missing permission, paused mappings, and active controller monitoring.
+- Added a `复制诊断信息` button that copies a readable diagnostic summary for feedback.
+- The local package `READ-ME-FIRST.txt` now includes git commit, tag, and clean/dirty status from packaging time.
+- Updated the app bundle marketing version to `0.7.0`.
+- Updated README testing steps and package examples for `v0.7.0`.
+
+Validation:
+
+- Built successfully with Xcode/macOS Debug target.
+- Rebuilt the local test package with `Scripts/package-local-release.sh v0.7.0`.
+- Verified the zip includes `JoyBridge.app`, `README.md`, `CHANGELOG.md`, and `READ-ME-FIRST.txt`.
+- Verified the built app bundle reports `CFBundleShortVersionString = 0.7.0`.
+- Verified the package script still completes and prints package source metadata.
+
+Known limitations:
+
+- This is still a local friend-test package, not a notarized public release.
+- The visible app test version is intended for local release tracking and friend testing.
+- The diagnostic summary is a simple clipboard helper, not a full logging system.
+
+### 中文
+
+本次更新让 JoyBridge 安装后更容易测试，尤其适合发给非程序员朋友试用。
+
+本次更新：
+
+- 主窗口顶部新增运行检查面板。
+- 运行检查面板会汇总辅助功能权限、控制器连接、目标控制器状态和映射输出状态。
+- 主窗口和菜单栏新增可见测试版本信息。
+- 菜单栏标题/图标会根据关键状态变化，例如未授权、映射暂停、正在监听控制器。
+- 新增 `复制诊断信息` 按钮，可以复制一段可读的问题反馈摘要。
+- 本地测试包的 `READ-ME-FIRST.txt` 现在会包含打包时的 git commit、tag 和 clean/dirty 状态。
+- App bundle 的 marketing version 更新为 `0.7.0`。
+- 更新 README 中的测试步骤和 `v0.7.0` 打包示例。
+
+验证结果：
+
+- Xcode/macOS Debug 目标构建成功。
+- 已用 `Scripts/package-local-release.sh v0.7.0` 重新生成本地测试包。
+- 确认 zip 内包含 `JoyBridge.app`、`README.md`、`CHANGELOG.md` 和 `READ-ME-FIRST.txt`。
+- 确认构建后的 App bundle 显示 `CFBundleShortVersionString = 0.7.0`。
+- 确认打包脚本仍可完成，并会输出测试包来源信息。
+
+已知限制：
+
+- 这仍然是本地朋友测试包，不是经过 Apple 公证的正式公开发行版。
+- App 内可见版本号主要用于本地版本追踪和朋友测试。
+- 诊断信息只是简单的剪贴板辅助功能，不是完整日志系统。
+
+## v0.6.0 - 2026-05-11
+
+### English
+
+This update adds a global pause/resume switch for safer daily use while JoyBridge is running in the menu bar.
+
+Changed:
+
+- Added a persisted global mapping pause state stored in `UserDefaults`.
+- Added a mapping status section in the main window.
+- Added `暂停映射` / `启用映射` controls in the main window and menu bar.
+- When mappings are paused, JoyBridge still detects controller input and updates the latest pressed button, but it does not send keyboard events.
+- Pausing mappings releases any held modifier-only mappings immediately to reduce stuck modifier risk.
+- Added logs for paused mapping attempts, pausing, and resuming.
+- Updated README testing steps and package notes.
+
+Validation:
+
+- Built successfully with Xcode/macOS Debug target.
+- Rebuilt the local test package with `Scripts/package-local-release.sh v0.6.0`.
+- Verified the zip includes `JoyBridge.app`, `README.md`, `CHANGELOG.md`, and `READ-ME-FIRST.txt`.
+
+Known limitations:
+
+- This is still a local friend-test package, not a notarized public release.
+- The pause state is restored on next launch. If mappings do not fire after restarting, check whether JoyBridge is paused.
+- Pause/resume does not disconnect or stop controller monitoring; it only stops keyboard output.
+
+### 中文
+
+本次更新新增全局暂停/启用映射开关，让 JoyBridge 在菜单栏常驻时更适合日常使用。
+
+本次更新：
+
+- 新增全局映射暂停状态，并使用 `UserDefaults` 保存。
+- 主窗口新增映射状态区域。
+- 主窗口和菜单栏都新增 `暂停映射` / `启用映射` 控制。
+- 暂停映射时，JoyBridge 仍会识别手柄输入并更新最近按键，但不会发送键盘事件。
+- 暂停映射时会立即释放已经按住的纯修饰键映射，降低修饰键卡住风险。
+- 新增暂停、恢复、暂停期间按键的日志。
+- 更新 README 测试步骤和测试包说明。
+
+验证结果：
+
+- Xcode/macOS Debug 目标构建成功。
+- 已用 `Scripts/package-local-release.sh v0.6.0` 重新生成本地测试包。
+- 确认 zip 内包含 `JoyBridge.app`、`README.md`、`CHANGELOG.md` 和 `READ-ME-FIRST.txt`。
+
+已知限制：
+
+- 这仍然是本地朋友测试包，不是经过 Apple 公证的正式公开发行版。
+- 暂停状态会在下次启动时恢复。如果重启后映射没有触发，请先检查 JoyBridge 是否处于暂停状态。
+- 暂停/启用不会断开或停止控制器监听，只会停止键盘输出。
+
+## v0.5.1 - 2026-05-11
+
+### English
+
+This update fixes the first-open instructions for the local friend-test package when macOS Gatekeeper blocks JoyBridge.
+
+Changed:
+
+- Updated README with a dedicated `If macOS Blocks JoyBridge` section.
+- Updated the package `READ-ME-FIRST.txt` generated by `Scripts/package-local-release.sh`.
+- Added the recommended System Settings > Privacy & Security > Open Anyway path.
+- Added a local tester fallback command for removing the quarantine flag from `/Applications/JoyBridge.app`.
+- Updated the package example output to `dist/JoyBridge-v0.5.1-local-test.zip`.
+
+Validation:
+
+- Rebuilt the local test package with `Scripts/package-local-release.sh v0.5.1`.
+- Verified the zip includes `JoyBridge.app`, `README.md`, `CHANGELOG.md`, and `READ-ME-FIRST.txt`.
+- Kept app runtime behavior unchanged.
+
+Known limitations:
+
+- This is still a local friend-test package, not a notarized public release.
+- It is still signed with Apple Development, not Developer ID.
+- Gatekeeper warnings are expected until JoyBridge has a Developer ID signing and notarization flow.
+- Only use the quarantine-removal fallback for builds you trust.
+
+### 中文
+
+本次更新修复本地朋友测试包在 macOS Gatekeeper 首次打开被拦截时的说明。
+
+本次更新：
+
+- 在 README 中新增专门的“如果 macOS 拦截 JoyBridge”说明。
+- 更新 `Scripts/package-local-release.sh` 生成的包内 `READ-ME-FIRST.txt`。
+- 增加推荐处理路径：系统设置 > 隐私与安全性 > 仍要打开。
+- 增加本地测试者备用命令，用于移除 `/Applications/JoyBridge.app` 的隔离标记。
+- 更新测试包示例输出为 `dist/JoyBridge-v0.5.1-local-test.zip`。
+
+验证结果：
+
+- 已用 `Scripts/package-local-release.sh v0.5.1` 重新生成本地测试包。
+- 确认 zip 内包含 `JoyBridge.app`、`README.md`、`CHANGELOG.md` 和 `READ-ME-FIRST.txt`。
+- 没有修改 App 运行时逻辑。
+
+已知限制：
+
+- 这仍然是本地朋友测试包，不是经过 Apple 公证的正式公开发行版。
+- 它仍然使用 Apple Development 签名，不是 Developer ID 签名。
+- 在 JoyBridge 完成 Developer ID 签名和 Apple 公证流程之前，Gatekeeper 拦截是预期限制。
+- 只有在你确认测试包可信时，才使用移除隔离标记的备用命令。
+
+## v0.5.0 - 2026-05-11
+
+### English
+
+This update adds a repeatable local packaging workflow for friend-test builds.
+
+Changed:
+
+- Added `Scripts/package-local-release.sh`.
+- Added `dist/` to `.gitignore` so generated packages are not committed.
+- The script builds the macOS Release app with Xcode.
+- The script stages `JoyBridge.app`, `README.md`, `CHANGELOG.md`, and a `READ-ME-FIRST.txt` tester note.
+- The script creates `dist/JoyBridge-v0.5.0-local-test.zip`.
+- The script prints code-signing and Gatekeeper assessment information for easier debugging.
+- Updated README with local package creation steps and friend-test warnings.
+
+Validation:
+
+- Built and packaged successfully with the local packaging script.
+- Kept app runtime behavior unchanged.
+
+Known limitations:
+
+- The generated package is for local friend testing only.
+- It is signed with Apple Development for testing, not Developer ID for public distribution.
+- It is not notarized by Apple yet, so macOS may show a security warning after download.
+- Friends may need to right-click JoyBridge and choose Open, or approve it in System Settings > Privacy & Security.
+- Recommended install order is: unzip, move `JoyBridge.app` to `/Applications`, open it, then grant Accessibility permission.
+- Accessibility permission must be granted to the installed copy of JoyBridge, not only the previous Xcode build path.
+- `spctl` may report `rejected` or an internal code-signing error for this local package. That is expected for this non-notarized test package and means it is not a public release.
+- This update does not add login-item autostart.
+
+### 中文
+
+本次更新新增可重复执行的本地打包流程，方便生成朋友测试包。
+
+本次更新：
+
+- 新增 `Scripts/package-local-release.sh`。
+- 在 `.gitignore` 中加入 `dist/`，避免把生成的测试包提交进仓库。
+- 脚本会用 Xcode 构建 macOS Release 版本。
+- 脚本会整理 `JoyBridge.app`、`README.md`、`CHANGELOG.md` 和 `READ-ME-FIRST.txt` 测试说明。
+- 脚本会生成 `dist/JoyBridge-v0.5.0-local-test.zip`。
+- 脚本会输出代码签名和 Gatekeeper 检查信息，方便排查打开失败的问题。
+- 更新 README，加入本地测试包生成步骤和朋友测试注意事项。
+
+验证结果：
+
+- 已通过本地打包脚本成功构建并生成测试包。
+- 没有修改 App 运行时逻辑。
+
+已知限制：
+
+- 生成的包只适合本地朋友测试。
+- 它使用 Apple Development 测试签名，不是用于公开分发的 Developer ID 签名。
+- 它还没有经过 Apple 公证，所以下载后 macOS 可能会显示安全提醒。
+- 朋友可能需要右键点击 JoyBridge 后选择打开，或在 系统设置 > 隐私与安全性 中手动允许。
+- 建议安装顺序是：解压、把 `JoyBridge.app` 移到“应用程序”、打开 App、再授权辅助功能权限。
+- 辅助功能权限必须授权给安装后的 JoyBridge，而不只是以前的 Xcode 构建路径。
+- `spctl` 可能会对这个本地测试包显示 `rejected` 或代码签名内部错误。这对未公证测试包来说是预期限制，也表示它不是公开发行版。
+- 本次更新不包含开机自启。
+
+## v0.4.0 - 2026-05-10
+
+### English
+
+This update adds the first menu bar mode for daily testing.
+
+Changed:
+
+- Added a JoyBridge menu bar item.
+- Closing the main window no longer quits JoyBridge.
+- The menu bar item can reopen the JoyBridge window.
+- The menu bar item can rescan controllers.
+- The menu bar item shows controller and Accessibility permission status.
+- The menu bar item can request/check Accessibility permission.
+- The menu bar item can fully quit JoyBridge.
+- Quitting JoyBridge now releases any held modifier-only mappings before termination.
+- Added in-app and README notes explaining that this is not login-item autostart yet.
+
+Validation:
+
+- Built successfully with Xcode/macOS Debug target.
+- Kept the existing target controller locking and mapping logic unchanged.
+
+Known limitations:
+
+- JoyBridge still does not launch automatically after a Mac restart. Open it manually, then use the menu bar item while testing.
+- This is still an Xcode-run test build, not a packaged `.dmg`.
+- Target controller locking still may not distinguish two completely identical controllers across launches.
+- If repeated menu bar reopening ever creates duplicate windows during testing, that should be tightened in the next AppKit window-management pass.
+
+### 中文
+
+本次更新新增第一版菜单栏常驻模式，方便日常测试。
+
+本次更新：
+
+- 新增 JoyBridge 菜单栏入口。
+- 关闭主窗口后 JoyBridge 不再退出。
+- 可以从菜单栏重新打开 JoyBridge 窗口。
+- 可以从菜单栏重新检测控制器。
+- 菜单栏会显示控制器和辅助功能权限状态。
+- 可以从菜单栏请求/重新检测辅助功能权限。
+- 可以从菜单栏完全退出 JoyBridge。
+- 退出 JoyBridge 前会释放已经按住的纯修饰键映射，降低修饰键卡住的风险。
+- 在 App 和 README 中补充说明：这还不是开机自启。
+
+验证结果：
+
+- Xcode/macOS Debug 目标构建成功。
+- 保持现有目标控制器锁定和映射逻辑不变。
+
+已知限制：
+
+- JoyBridge 还不会在 Mac 重启后自动启动。重启后仍需要手动打开，然后在测试过程中使用菜单栏入口。
+- 当前仍然是 Xcode 运行的测试版，还不是打包好的 `.dmg`。
+- 目标控制器锁定仍可能无法在跨启动后精确区分两只完全相同型号的控制器。
+- 如果后续测试发现反复从菜单栏打开会产生重复窗口，下一轮再收紧 AppKit 窗口管理。
+
+## v0.3.0 - 2026-05-10
+
+### English
+
+This update adds target controller locking, the first step toward making JoyBridge safer as an installable daily-use app.
+
+Changed:
+
+- Added a target controller picker in the controller status section.
+- Added `锁定当前`, which saves the currently active controller as the target controller.
+- Added target controller persistence through `UserDefaults`.
+- JoyBridge now scans all connected controllers but only configures the selected target controller when a target is locked.
+- Connection notifications now rescan through the same target-selection logic instead of automatically switching to the newest connected controller.
+- When the target controller is missing, JoyBridge clears the active controller and does not automatically respond to another Bluetooth controller.
+- Added cleanup for old GameController handlers when switching or clearing the active controller, reducing the risk of stale callbacks from a previously active controller.
+
+Validation:
+
+- Built successfully with Xcode/macOS Debug target.
+- Verified that the existing mapping code was not moved into the UI or `MappingManager`.
+
+Known limitations:
+
+- The target controller identity uses GameController-visible metadata such as vendor name, product category, and profile type. This is enough for distinguishing common different controller types, but it may not reliably distinguish two identical controllers across launches.
+- This is still an Xcode-run test build, not a packaged `.dmg`.
+
+### 中文
+
+本次更新新增“目标控制器锁定”，这是把 JoyBridge 做成日常可安装 App 前的第一步安全改进。
+
+本次更新：
+
+- 在控制器状态区域新增目标控制器选择器。
+- 新增 `锁定当前`，可以把当前正在使用的控制器保存为目标控制器。
+- 使用 `UserDefaults` 保存目标控制器选择。
+- JoyBridge 现在会扫描所有已连接控制器，但锁定目标后只配置被选中的目标控制器。
+- 控制器连接通知现在统一走目标选择逻辑，不再因为新连接了其他手柄就自动切换过去。
+- 如果目标控制器没有连接，JoyBridge 会清空当前活动控制器，并且不会自动响应其他蓝牙手柄。
+- 切换或清空活动控制器时，会清理旧的 GameController 回调，降低旧控制器残留回调误触发的风险。
+
+验证结果：
+
+- Xcode/macOS Debug 目标构建成功。
+- 确认没有把映射逻辑移动到 UI 或 `MappingManager` 中。
+
+已知限制：
+
+- 目标控制器身份使用 GameController 能看到的 vendor name、product category、profile type 等信息。它足够区分常见的不同类型手柄，但如果同时使用两只完全同型号手柄，跨启动后仍可能无法精确区分。
+- 当前仍然是 Xcode 运行的测试版，还不是打包好的 `.dmg`。
+
+## v0.2.2 - 2026-05-10
+
+### English
+
+This update records the latest friend-test result for using both Joy-Cons together.
+
+Changed:
+
+- Updated the in-app tester note to recommend connecting both left and right Joy-Cons for fuller input coverage.
+- Updated the README with the confirmed Joy-Con pairing behavior:
+  - When both left and right Joy-Cons are connected at the same time, DPad, `A/B/X/Y`, and `L/R/ZL/ZR` work.
+  - When only a single Joy-Con is connected, face/direction buttons work, but `L/R/ZL/ZR` may not report value changes through `GameController.framework`.
+
+Validation:
+
+- Built successfully with Xcode/macOS Debug target.
+- Manually tested both Joy-Cons connected at the same time:
+  - DPad works.
+  - `A/B/X/Y` work.
+  - `L/R/ZL/ZR` work.
+
+Known limitations:
+
+- Single Joy-Con shoulder/trigger buttons (`L/R/ZL/ZR`) may still be unavailable when only one Joy-Con is paired.
+- Switch Pro Controller and compatible full controllers still need separate validation for shoulder/trigger buttons.
+- No packaged `.dmg` release yet. Friends still need to run the project from Xcode.
+
+### 中文
+
+本次更新记录了“左右 Joy-Con 同时连接”的最新朋友测试结果。
+
+本次更新：
+
+- 更新 App 内调试提示，建议同时连接左右 Joy-Con，以获得更完整的按键支持。
+- 更新 README，明确 Joy-Con 不同连接方式下的实测表现：
+  - 同时连接左右 Joy-Con 时，方向键、`A/B/X/Y` 和 `L/R/ZL/ZR` 都可以正常工作。
+  - 只连接单只 Joy-Con 时，面键/方向键可用，但 `L/R/ZL/ZR` 可能不会通过 `GameController.framework` 上报数值变化。
+
+验证结果：
+
+- Xcode/macOS Debug 目标构建成功。
+- 手动测试同时连接左右 Joy-Con：
+  - 方向键可用。
+  - `A/B/X/Y` 可用。
+  - `L/R/ZL/ZR` 可用。
+
+已知限制：
+
+- 只连接单只 Joy-Con 时，肩键/扳机键（`L/R/ZL/ZR`）可能仍然不可用。
+- Switch Pro Controller 和兼容完整手柄的肩键/扳机键还需要单独验证。
+- 暂时没有打包 `.dmg`，朋友仍然需要用 Xcode 运行项目。
+
+## v0.2.1 - 2026-05-10
+
+### English
+
+This is a focused friend-test update based on single Joy-Con testing.
+
+Changed:
+
+- Added a safer physical input polling fallback for shoulder/trigger diagnostics without polling DPad buttons, avoiding duplicate direction-key triggers during Joy-Con testing.
+- Added an in-app tester note that single Joy-Con `L/R/ZL/ZR` may be limited by macOS `GameController.framework`.
+- Updated the README and changelog with the confirmed single Joy-Con support status.
+
+Validation:
+
+- Built successfully with Xcode/macOS Debug target.
+- Manually tested single `Joy-Con (L)` and single `Joy-Con (R)` with friend-test logs:
+  - `Joy-Con (L)` direction buttons work after correction.
+  - `Joy-Con (R)` `A/B/X/Y` buttons work.
+  - Single Joy-Con `L/R/ZL/ZR` did not report value changes through `GameController.framework`.
+
+Known limitations:
+
+- Single Joy-Con shoulder/trigger buttons (`L/R/ZL/ZR`) may not be mappable in the current GameController-based MVP because macOS does not always expose their press states for separately paired Joy-Cons.
+- Switch Pro Controller and compatible full controllers still need separate validation for shoulder/trigger buttons.
+- No packaged `.dmg` release yet. Friends still need to run the project from Xcode.
+
+### 中文
+
+这是基于单只 Joy-Con 实测结果整理的小版本更新。
+
+本次更新：
+
+- 新增更安全的物理输入轮询兜底，只用于肩键/扳机键诊断，不再轮询 DPad，避免 Joy-Con 测试时方向键被重复触发。
+- 在 App 调试提示中注明：单只 Joy-Con 的 `L/R/ZL/ZR` 可能受 macOS `GameController.framework` 限制。
+- 更新 README 和 CHANGELOG，明确写出当前单只 Joy-Con 的实测支持情况。
+
+验证结果：
+
+- Xcode/macOS Debug 目标构建成功。
+- 根据朋友测试日志手动确认：
+  - `Joy-Con (L)` 方向键校正后可用。
+  - `Joy-Con (R)` 的 `A/B/X/Y` 可用。
+  - 单只 Joy-Con 的 `L/R/ZL/ZR` 没有通过 `GameController.framework` 上报数值变化。
+
+已知限制：
+
+- 单只 Joy-Con 的肩键/扳机键（`L/R/ZL/ZR`）在当前基于 GameController 的 MVP 中可能无法映射，因为 macOS 不一定会暴露单独配对 Joy-Con 的这些按键状态。
+- Switch Pro Controller 和兼容完整手柄的肩键/扳机键还需要单独验证。
+- 暂时没有打包 `.dmg`，朋友仍然需要用 Xcode 运行项目。
+
+## v0.2.0 - 2026-05-10
+
+### English
+
+This is the first friend-test update after the initial JoyBridge MVP.
+
+Important notice for testers:
+
+- This release is source code only. It is not a packaged `.dmg` or ready-to-install app yet.
+- To test it, open `JoyBridge.xcodeproj` in Xcode, select the `JoyBridge` target, choose your own Apple Team or Personal Team in `Signing & Capabilities`, then run it on `My Mac`.
+- After the app launches, grant JoyBridge Accessibility permission in System Settings > Privacy & Security > Accessibility. Without this permission, JoyBridge can detect controller input but cannot send keyboard events.
+- If Accessibility was granted to an older Xcode build path and the app still shows as unauthorized, remove/re-add JoyBridge in Accessibility settings or run `tccutil reset Accessibility cc.afterlight.JoyBridge`, then launch the app again.
+- Because there is no menu bar mode or login item yet, JoyBridge must be opened manually after each restart.
+- The current build is best treated as a local test build for friends who are comfortable running an Xcode project.
+
+Changed:
+
+- Added modifier-only mappings, so a controller button can hold `Command`, `Option`, `Control`, or `Shift` without requiring a main key.
+- Added `None/无` to the key picker for modifier-only mappings.
+- Added real modifier key down/up events, so modifier-only bindings can be held and combined with another mapped button.
+- Improved controller release handling so held modifiers are released when the mapped controller button is released, the mapping is edited, or the controller disconnects.
+- Expanded controller input handling with `physicalInputProfile` diagnostics for better Joy-Con and compatible controller support.
+- Added a left Joy-Con direction correction for single `Joy-Con (L)` use:
+  - `Button Y -> DPad Right`
+  - `Button X -> DPad Down`
+  - `Button B -> DPad Up`
+  - `Button A -> DPad Left`
+- Improved logs for controller profiles, button values, DPad axes, mapping lookup, modifier holds, and keyboard event sending.
+- Updated the README with modifier-only mapping instructions and troubleshooting notes.
+
+Validation:
+
+- Built successfully with Xcode/macOS Debug target.
+- Manually tested Accessibility permission detection.
+- Manually tested Joy-Con (L) direction input correction during local development.
+
+Known limitations:
+
+- No packaged `.dmg` release yet.
+- Friends still need to open the project in Xcode, select their own Team, run the app, and grant Accessibility permission.
+- No menu bar mode or login item support yet, so the app must be opened manually after restart.
+
+### 中文
+
+这是 JoyBridge 初始 MVP 之后的第一个朋友测试版更新。
+
+测试者重要提醒：
+
+- 当前版本只有源码，还不是已经打包好的 `.dmg` 或可直接安装的 App。
+- 测试时需要用 Xcode 打开 `JoyBridge.xcodeproj`，选择 `JoyBridge` Target，在 `Signing & Capabilities` 里选择你自己的 Apple Team 或 Personal Team，然后选择 `My Mac` 运行。
+- App 启动后，必须在 系统设置 > 隐私与安全性 > 辅助功能 中给 JoyBridge 授权。没有这个权限时，JoyBridge 可以识别手柄输入，但不能发送键盘事件。
+- 如果以前给旧的 Xcode 构建路径授权过，但 App 仍显示未授权，可以在辅助功能设置中移除/重新添加 JoyBridge，或者运行 `tccutil reset Accessibility cc.afterlight.JoyBridge` 后重新启动 App。
+- 当前还没有菜单栏常驻和开机自启，所以每次重启电脑后都需要手动打开 JoyBridge。
+- 这个版本更适合作为“愿意用 Xcode 运行项目的朋友测试版”，不是面向普通用户的一键安装版。
+
+本次更新：
+
+- 新增纯修饰键映射，可以把手柄按钮映射成只按住 `Command`、`Option`、`Control` 或 `Shift`，不再强制选择主键。
+- 在 Key 选择器中新增 `None/无`，用于配置纯修饰键。
+- 新增真实修饰键按下/松开事件，让纯修饰键可以被按住，并和另一个手柄按钮组合使用。
+- 改进释放逻辑：松开手柄按钮、编辑映射、断开控制器时，会释放已经按住的修饰键。
+- 扩展了 `physicalInputProfile` 输入诊断，更好地支持 Joy-Con 和兼容手柄。
+- 针对单只 `Joy-Con (L)` 新增方向键校正：
+  - `Button Y -> DPad Right`
+  - `Button X -> DPad Down`
+  - `Button B -> DPad Up`
+  - `Button A -> DPad Left`
+- 改进日志输出，包含控制器 profile、按钮值、DPad 轴向、映射查找、修饰键保持和键盘事件发送。
+- 更新 README，补充纯修饰键映射和排错说明。
+
+验证结果：
+
+- Xcode/macOS Debug 目标构建成功。
+- 本地手动测试了 Accessibility 权限检测。
+- 本地开发过程中手动测试了 `Joy-Con (L)` 方向键校正。
+
+已知限制：
+
+- 暂时没有打包 `.dmg`。
+- 朋友仍然需要用 Xcode 打开项目，选择自己的 Team，运行 App，并授权 Accessibility 辅助功能权限。
+- 暂时没有菜单栏常驻和开机自启，重启电脑后需要手动打开 App。
