@@ -29,7 +29,7 @@ JoyBridge 已有可运行 MVP，但代码仍处在快速堆功能后的状态。
 
 | Phase | 目标 | 状态 |
 |---|---|---|
-| 01-bootstrap-new-repo-and-specs | 新仓库、源码基线、First Flight 文档完整落地 | in progress |
+| 01-bootstrap-new-repo-and-specs | 新仓库、源码基线、First Flight 文档完整落地 | completed |
 | 02-domain-and-store | 抽出领域模型、MappingProfile、MappingStore 和核心测试 | pending |
 | 03-input-output-services | 解耦手柄输入、目标过滤、映射执行、键盘输出和权限检查 | pending |
 | 04-runtime-diagnostics-ui | 重整运行状态、诊断信息、主窗口和菜单栏体验 | pending |
@@ -44,6 +44,5 @@ JoyBridge 已有可运行 MVP，但代码仍处在快速堆功能后的状态。
 
 ## Open Questions
 
-- 是否由 AI 执行初始 commit/push，还是用户自己提交。AGENTS 规则默认需要用户确认。
 - 新增 `JoyBridgeTests` target 时，是否顺手整理 Xcode group 结构。
 - 朋友测试版本号是否继续沿用 `v0.10.0`，还是重构版改为 `v0.11.0`。

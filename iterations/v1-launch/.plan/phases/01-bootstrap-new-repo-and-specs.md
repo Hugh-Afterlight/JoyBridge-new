@@ -1,6 +1,6 @@
 # Phase 01 · bootstrap-new-repo-and-specs
 
-Status: in progress
+Status: completed
 
 ## Goal
 
@@ -19,7 +19,7 @@ Status: in progress
 - [x] 补齐 CONTENT 内容索引。(iterations/v1-launch/CONTENT.md:1)
 - [x] 生成 AGENTS 和 CLAUDE 入口文档。(AGENTS.md:1, CLAUDE.md:1)
 - [x] 建立 v1-launch phase 计划目录。(iterations/v1-launch/.plan/plan.md:1)
-- [ ] 初始 commit/push 到新仓库。(waiting: 需要用户确认是否由 AI 提交，或用户自行提交)
+- [x] 初始 commit/push 到新仓库。(commit 3ce5568, command: `git push -u origin main`)
 
 ## Acceptance
 
