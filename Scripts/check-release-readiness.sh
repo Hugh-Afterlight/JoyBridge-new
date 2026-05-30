@@ -15,8 +15,14 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROJECT_FILE="$REPO_ROOT/JoyBridge.xcodeproj/project.pbxproj"
 APP_INFO_FILE="$REPO_ROOT/JoyBridge/Utilities/AppInfo.swift"
 APP_ICON_DIR="$REPO_ROOT/JoyBridge/Assets.xcassets/AppIcon.appiconset"
+EXPECTED_BUNDLE_ID="cc.afterlight.JoyBridgeNew"
+DEFAULT_XCODE_DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
 
 WARNINGS=0
+
+if [[ -z "${DEVELOPER_DIR:-}" && -d "$DEFAULT_XCODE_DEVELOPER_DIR" ]]; then
+  export DEVELOPER_DIR="$DEFAULT_XCODE_DEVELOPER_DIR"
+fi
 
 ok() {
   printf 'OK: %s\n' "$1"
@@ -47,6 +53,7 @@ if [[ -n "$APP_PATH" ]]; then
   info "App path: $APP_PATH"
 fi
 info "Repo: $REPO_ROOT"
+info "Expected bundle id: $EXPECTED_BUNDLE_ID"
 
 print_header "Git"
 if command_exists git && git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -113,6 +120,7 @@ if [[ -n "$EXPECTED_VERSION" ]]; then
 fi
 
 print_header "Xcode tools"
+info "Developer dir: ${DEVELOPER_DIR:-$(xcode-select -p 2>/dev/null || printf 'not found')}"
 if command_exists xcodebuild; then
   XCODEBUILD_VERSION="$(xcodebuild -version 2>&1 || true)"
   if [[ "$XCODEBUILD_VERSION" == Xcode* ]]; then
@@ -189,6 +197,15 @@ if [[ -n "$APP_PATH" ]]; then
   fi
 
   if [[ -f "$APP_PATH/Contents/Info.plist" ]]; then
+    BUILT_BUNDLE_ID="$(plutil -extract CFBundleIdentifier raw "$APP_PATH/Contents/Info.plist" 2>/dev/null || true)"
+    if [[ "$BUILT_BUNDLE_ID" == "$EXPECTED_BUNDLE_ID" ]]; then
+      ok "Built app bundle id: $BUILT_BUNDLE_ID"
+    elif [[ -n "$BUILT_BUNDLE_ID" ]]; then
+      warn "Built app bundle id is $BUILT_BUNDLE_ID; expected $EXPECTED_BUNDLE_ID"
+    else
+      warn "Could not read built app bundle id"
+    fi
+
     BUILT_VERSION="$(plutil -extract CFBundleShortVersionString raw "$APP_PATH/Contents/Info.plist" 2>/dev/null || true)"
     if [[ -n "$BUILT_VERSION" ]]; then
       ok "Built app version: $BUILT_VERSION"
@@ -214,8 +231,9 @@ if [[ -n "$APP_PATH" ]]; then
     warn "Built app does not contain Assets.car"
   fi
 
-  if [[ -x "$APP_PATH/Contents/MacOS/JoyBridge" ]]; then
-    LIPO_OUTPUT="$(lipo -info "$APP_PATH/Contents/MacOS/JoyBridge" 2>/dev/null || true)"
+  APP_EXECUTABLE="$APP_PATH/Contents/MacOS/$(basename "$APP_PATH" .app)"
+  if [[ -x "$APP_EXECUTABLE" ]]; then
+    LIPO_OUTPUT="$(lipo -info "$APP_EXECUTABLE" 2>/dev/null || true)"
     if [[ "$LIPO_OUTPUT" == *"arm64"* && "$LIPO_OUTPUT" == *"x86_64"* ]]; then
       ok "Built app is Universal: $LIPO_OUTPUT"
     elif [[ "$LIPO_OUTPUT" == *"arm64"* ]]; then

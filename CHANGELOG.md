@@ -17,6 +17,7 @@ Changed:
 - Updated the visible test version and app bundle marketing version to `v0.10.0`.
 - Updated the app bundle build number to `10`.
 - Updated README and release checklist examples for `v0.10.0`.
+- In the refactor repository, aligned local package naming with `JoyBridge-new.app` and bundle id `cc.afterlight.JoyBridgeNew`.
 
 Validation:
 
@@ -25,7 +26,7 @@ Validation:
 - Built successfully with Xcode/macOS Debug target.
 - Ran the release-readiness checker for `v0.10.0`; remaining warnings are expected before a clean tag and Developer ID notarization setup.
 - Rebuilt the local test package with `Scripts/package-local-release.sh v0.10.0`.
-- Verified the zip includes `JoyBridge.app`, `FRIEND_TESTING.md`, `README.md`, `CHANGELOG.md`, `RELEASE_CHECKLIST.md`, `READ-ME-FIRST.txt`, and `Scripts/check-release-readiness.sh`.
+- Verified the zip includes `JoyBridge-new.app`, `FRIEND_TESTING.md`, `README.md`, `CHANGELOG.md`, `RELEASE_CHECKLIST.md`, `READ-ME-FIRST.txt`, and `Scripts/check-release-readiness.sh`.
 - Verified the built app bundle reports `CFBundleShortVersionString = 0.10.0` and `CFBundleVersion = 10`.
 
 Known limitations:
@@ -49,6 +50,7 @@ Known limitations:
 - 可见测试版本和 App bundle marketing version 更新为 `v0.10.0`。
 - App bundle build number 更新为 `10`。
 - 更新 README 和发布检查清单中的 `v0.10.0` 示例。
+- 在重构仓库中，将本地测试包命名对齐为 `JoyBridge-new.app` 和 bundle id `cc.afterlight.JoyBridgeNew`。
 
 验证结果：
 
@@ -57,7 +59,7 @@ Known limitations:
 - Xcode/macOS Debug 目标构建成功。
 - 已运行 `v0.10.0` 发布准备检查；clean tag 和 Developer ID 公证配置完成前，剩余警告属于预期状态。
 - 已用 `Scripts/package-local-release.sh v0.10.0` 重新生成本地测试包。
-- 确认 zip 内包含 `JoyBridge.app`、`FRIEND_TESTING.md`、`README.md`、`CHANGELOG.md`、`RELEASE_CHECKLIST.md`、`READ-ME-FIRST.txt` 和 `Scripts/check-release-readiness.sh`。
+- 确认 zip 内包含 `JoyBridge-new.app`、`FRIEND_TESTING.md`、`README.md`、`CHANGELOG.md`、`RELEASE_CHECKLIST.md`、`READ-ME-FIRST.txt` 和 `Scripts/check-release-readiness.sh`。
 - 确认构建后的 App bundle 显示 `CFBundleShortVersionString = 0.10.0`、`CFBundleVersion = 10`。
 
 已知限制：

@@ -7,7 +7,8 @@ JoyBridge is currently distributed as a local test `.zip`. A public macOS releas
 ## Current Status
 
 - Current test version: `v0.10.0`
-- Bundle identifier: `cc.afterlight.JoyBridge`
+- App bundle: `JoyBridge-new.app`
+- Bundle identifier: `cc.afterlight.JoyBridgeNew`
 - Local friend-test package: supported
 - Developer ID public distribution: not ready yet
 - Apple notarization: not performed yet
@@ -31,8 +32,10 @@ Scripts/check-release-readiness.sh v0.10.0
 To also inspect a built or installed app bundle:
 
 ```sh
-Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge.app
+Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge-new.app
 ```
+
+Friends usually install to `/Applications/JoyBridge-new.app`. Hugh's current local verification copy may be at `/Users/hugh/Applications/JoyBridge-new.app`; use the App path shown inside JoyBridge-new when checking a specific machine.
 
 Strict mode exits with a non-zero status when warnings are found:
 
@@ -107,7 +110,8 @@ The readiness script only checks whether this environment variable is set. It do
 ### 当前状态
 
 - 当前测试版本：`v0.10.0`
-- Bundle identifier：`cc.afterlight.JoyBridge`
+- App bundle：`JoyBridge-new.app`
+- Bundle identifier：`cc.afterlight.JoyBridgeNew`
 - 本地朋友测试包：支持
 - Developer ID 公开分发：尚未完成
 - Apple 公证：尚未执行
@@ -131,8 +135,10 @@ Scripts/check-release-readiness.sh v0.10.0
 如果还想检查已经构建或安装的 App bundle：
 
 ```sh
-Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge.app
+Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge-new.app
 ```
+
+朋友测试通常安装到 `/Applications/JoyBridge-new.app`。Hugh 本机当前稳定验证副本可能在 `/Users/hugh/Applications/JoyBridge-new.app`；检查某台机器时，以 JoyBridge-new 界面里显示的 App 路径为准。
 
 严格模式会在发现警告时返回失败：
 

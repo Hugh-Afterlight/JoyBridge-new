@@ -14,7 +14,7 @@ struct JoyBridgeApp: App {
 
         let accessibilityPermissionManager = AccessibilityPermissionManager()
         let mappingManager = MappingManager(accessibilityPermissionManager: accessibilityPermissionManager)
-        let controllerManager = ControllerManager(mappingManager: mappingManager)
+        let controllerManager = ControllerManager(inputRuntime: mappingManager)
 
         _accessibilityPermissionManager = StateObject(wrappedValue: accessibilityPermissionManager)
         _mappingManager = StateObject(wrappedValue: mappingManager)
@@ -23,7 +23,7 @@ struct JoyBridgeApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("JoyBridge", id: "main") {
+        WindowGroup(AppIdentity.displayName, id: "main") {
             ContentView()
                 .environmentObject(accessibilityPermissionManager)
                 .environmentObject(mappingManager)
@@ -43,31 +43,34 @@ struct JoyBridgeApp: App {
     }
 
     private var menuBarTitle: String {
-        if !accessibilityPermissionManager.isTrusted {
-            return "JoyBridge 未授权"
+        if runtimeState.level == .blocked {
+            return "\(AppIdentity.displayName) 未授权"
         }
 
-        if mappingManager.isMappingPaused {
-            return "JoyBridge 暂停"
+        if runtimeState.level == .paused {
+            return "\(AppIdentity.displayName) 暂停"
         }
 
-        if controllerManager.isControllerConnected {
-            return "JoyBridge 运行"
+        if runtimeState.level == .ready {
+            return "\(AppIdentity.displayName) 运行"
         }
 
-        return "JoyBridge"
+        return "\(AppIdentity.displayName) 注意"
     }
 
     private var menuBarSystemImage: String {
-        if !accessibilityPermissionManager.isTrusted {
-            return "exclamationmark.triangle"
-        }
+        runtimeState.level.systemImageName
+    }
 
-        if mappingManager.isMappingPaused {
-            return "pause.circle"
-        }
-
-        return controllerManager.isControllerConnected ? "gamecontroller.fill" : "gamecontroller"
+    private var runtimeState: RuntimeState {
+        RuntimeState.make(
+            isAccessibilityTrusted: accessibilityPermissionManager.isTrusted,
+            currentControllerName: controllerManager.connectedControllerName,
+            isTargetControllerSelected: controllerManager.isTargetControllerSelected,
+            isSelectedTargetConnected: controllerManager.isSelectedTargetConnected,
+            selectedTargetControllerName: controllerManager.selectedTargetControllerName,
+            isMappingPaused: mappingManager.isMappingPaused
+        )
     }
 }
 
@@ -79,9 +82,9 @@ private struct JoyBridgeMenuBarView: View {
 
     var body: some View {
         Text("版本：\(AppInfo.currentTestVersion)")
-        Text("监听状态：\(controllerManager.isControllerConnected ? "运行中" : "等待控制器")")
+        Text("监听状态：\(controllerManager.isControllerConnected ? "运行中" : "等待手柄")")
         Text("映射状态：\(mappingManager.isMappingPaused ? "已暂停" : "已启用")")
-        Text("当前控制器：\(controllerManager.connectedControllerName ?? "未连接")")
+        Text("当前手柄：\(controllerManager.connectedControllerName ?? "未连接")")
         Text("辅助功能：\(accessibilityPermissionManager.isTrusted ? "已授权" : "未授权")")
 
         if let latestPressedButton = controllerManager.latestPressedButton {
@@ -104,13 +107,13 @@ private struct JoyBridgeMenuBarView: View {
         Button {
             showMainWindow()
         } label: {
-            Label("显示 JoyBridge", systemImage: "macwindow")
+            Label("显示 \(AppIdentity.displayName)", systemImage: "macwindow")
         }
 
         Button {
             controllerManager.scanControllers()
         } label: {
-            Label("重新检测控制器", systemImage: "gamecontroller")
+            Label("重新检测手柄", systemImage: "gamecontroller")
         }
 
         if accessibilityPermissionManager.isTrusted {
@@ -127,18 +130,24 @@ private struct JoyBridgeMenuBarView: View {
             }
         }
 
+        Button {
+            copyDiagnosticReport()
+        } label: {
+            Label("复制诊断信息", systemImage: "doc.on.doc")
+        }
+
         Divider()
 
         Button {
             mappingManager.releaseAllHeldModifiers()
             NSApp.terminate(nil)
         } label: {
-            Label("退出 JoyBridge", systemImage: "power")
+            Label("退出 \(AppIdentity.displayName)", systemImage: "power")
         }
     }
 
     private func showMainWindow() {
-        if let window = NSApp.windows.first(where: { $0.title == "JoyBridge" }) {
+        if let window = NSApp.windows.first(where: { $0.title == AppIdentity.displayName }) {
             if window.isMiniaturized {
                 window.deminiaturize(nil)
             }
@@ -150,5 +159,16 @@ private struct JoyBridgeMenuBarView: View {
 
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func copyDiagnosticReport() {
+        let report = DiagnosticsService().makeReport(
+            accessibilityPermissionManager: accessibilityPermissionManager,
+            mappingManager: mappingManager,
+            controllerManager: controllerManager
+        )
+
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(report.text, forType: .string)
     }
 }

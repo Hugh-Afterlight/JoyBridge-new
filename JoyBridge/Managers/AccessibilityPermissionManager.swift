@@ -4,7 +4,7 @@ import Combine
 import Foundation
 
 @MainActor
-final class AccessibilityPermissionManager: ObservableObject {
+final class AccessibilityPermissionManager: ObservableObject, AccessibilityPermissionProviding {
     @Published private(set) var isTrusted = false
     @Published private(set) var lastCheckedDescription = "尚未检测"
     @Published private(set) var currentAppPath = Bundle.main.bundlePath

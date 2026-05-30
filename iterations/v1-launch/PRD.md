@@ -45,7 +45,7 @@ JoyBridge 已有一个能运行的原生 macOS MVP：使用 Swift、SwiftUI、Ap
 
 ### 场景 2：连接并识别手柄
 
-用户通过 macOS 蓝牙设置连接 Joy-Con、Switch Pro Controller 或兼容手柄后，JoyBridge 可以重新检测控制器，并展示当前设备、目标设备和最近按键。若目标手柄未连接，不应自动切换到其他手柄。
+用户通过 macOS 蓝牙设置连接 Joy-Con、Switch Pro Controller 或兼容手柄后，JoyBridge 可以重新检测手柄，并展示当前设备、目标设备和最近按键。若目标手柄未连接，不应自动切换到其他手柄。
 
 ### 场景 3：锁定目标手柄
 

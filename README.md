@@ -8,7 +8,7 @@ It is not a game utility. The goal is simple: turn controller buttons into custo
 
 Latest shared test version: `v0.10.0` / `2026-05-11`
 
-This version adds a dedicated friend-testing guide, so trusted testers can install, approve, authorize, test, and report issues without reading the full developer README. It is still a local friend-test build, not a notarized public release. See [FRIEND_TESTING.md](FRIEND_TESTING.md), [CHANGELOG.md](CHANGELOG.md), and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for details.
+This refactor test build appears as `JoyBridge-new.app` with bundle id `cc.afterlight.JoyBridgeNew`, so it can be authorized separately from older JoyBridge builds. It is still a local friend-test build, not a notarized public release. See [FRIEND_TESTING.md](FRIEND_TESTING.md), [CHANGELOG.md](CHANGELOG.md), and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for details.
 
 ## MVP Features
 
@@ -20,7 +20,7 @@ This version adds a dedicated friend-testing guide, so trusted testers can insta
 - Single-key shortcuts, modifier-only bindings, and modifier combinations such as `Command + C` or `Command + Shift + S`
 - Debounced controller input so holding a button does not repeatedly fire
 - Target controller selection and locking, so other connected controllers do not trigger mappings
-- Menu bar item for checking status, reopening JoyBridge, rescanning controllers, checking Accessibility permission, and quitting the app
+- Menu bar item for checking status, reopening JoyBridge-new, rescanning controllers, checking Accessibility permission, copying diagnostics, and quitting the app
 - Global pause/resume switch for temporarily disabling all keyboard output
 - Readiness check panel for Accessibility, controller connection, target lock, and mapping output status
 - Copyable diagnostic summary for easier friend-test feedback
@@ -71,7 +71,7 @@ Note: these inputs are supported when Apple's `GameController.framework` exposes
 - Xcode 16 or later recommended
 - Apple Silicon Mac recommended for the current MVP
 - A Nintendo Joy-Con, Switch Pro Controller, or compatible Bluetooth controller
-- Accessibility permission granted to JoyBridge
+- Accessibility permission granted to JoyBridge-new
 
 ## Run Locally
 
@@ -80,16 +80,16 @@ Note: these inputs are supported when Apple's `GameController.framework` exposes
 3. Select the `JoyBridge` target.
 4. In `Signing & Capabilities`, choose your Apple Developer team or Personal Team.
 5. Run the app on `My Mac`.
-6. In JoyBridge, click `请求授权/打开设置`.
-7. Enable JoyBridge in System Settings > Privacy & Security > Accessibility.
-8. Return to JoyBridge and click `重新检测权限`.
+6. In JoyBridge-new, click `请求授权/打开设置`.
+7. Enable JoyBridge-new in System Settings > Privacy & Security > Accessibility.
+8. Return to JoyBridge-new and click `重新检测权限`.
 
 For local development, App Sandbox is currently disabled to keep Accessibility and keyboard event testing straightforward.
 
 If macOS still reports that Accessibility is missing after you grant permission, reset the permission record and run the app again:
 
 ```sh
-tccutil reset Accessibility cc.afterlight.JoyBridge
+tccutil reset Accessibility cc.afterlight.JoyBridgeNew
 ```
 
 ## Create a Local Test Package
@@ -103,7 +103,7 @@ Scripts/package-local-release.sh v0.10.0
 The script builds the Release app and writes the package to:
 
 ```text
-dist/JoyBridge-v0.10.0-local-test.zip
+dist/JoyBridge-new-v0.10.0-local-test.zip
 ```
 
 Important notes:
@@ -112,9 +112,9 @@ Important notes:
 - Start with `FRIEND_TESTING.md` for the shortest install and testing guide.
 - It is signed by Xcode for local testing, not with Developer ID for public distribution.
 - It is not notarized by Apple yet, so macOS may show a security warning when opening it after download.
-- Friends may need to right-click JoyBridge and choose Open, or approve it in System Settings > Privacy & Security.
-- Recommended order: unzip the package, move `JoyBridge.app` to `/Applications`, open it, then grant Accessibility permission.
-- Accessibility permission must be granted to the installed copy of JoyBridge. If an older Xcode build was authorized before, remove and re-add JoyBridge in Accessibility settings.
+- Friends may need to right-click JoyBridge-new and choose Open, or approve it in System Settings > Privacy & Security.
+- Recommended order: unzip the package, move `JoyBridge-new.app` to `/Applications`, open it, then grant Accessibility permission.
+- Accessibility permission must be granted to the installed copy of JoyBridge-new. If an older JoyBridge build was authorized before, keep it only if needed and add JoyBridge-new separately in Accessibility settings.
 - `spctl` may report `rejected` or an internal code-signing error for this local package. That means it is not a notarized public release.
 - `READ-ME-FIRST.txt` includes the git commit, tag, and whether the worktree was clean or dirty when packaged.
 - `FRIEND_TESTING.md` includes the friend install guide and feedback template.
@@ -133,38 +133,40 @@ Scripts/check-release-readiness.sh v0.10.0
 After building or installing an app, you can also check that app bundle:
 
 ```sh
-Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge.app
+Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge-new.app
 ```
+
+Friends usually install to `/Applications/JoyBridge-new.app`. Hugh's current local verification copy may be at `/Users/hugh/Applications/JoyBridge-new.app`; when in doubt, use the current App path shown inside JoyBridge-new.
 
 For the current local friend-test package, some warnings are expected. For example, the app is not signed with Developer ID yet, notarization credentials may not be configured, and there may be no stapled notarization ticket. Those warnings are a reminder that this package is for testing, not public distribution.
 
-### If macOS Blocks JoyBridge
+### If macOS Blocks JoyBridge-new
 
-If you see a dialog like `Apple cannot verify JoyBridge`, do not move it to Trash if you trust this local test build.
+If you see a dialog like `Apple cannot verify JoyBridge-new`, do not move it to Trash if you trust this local test build.
 
 Recommended path:
 
 1. Click Done in the warning dialog.
 2. Open System Settings > Privacy & Security.
 3. Scroll to Security.
-4. Click Open Anyway for JoyBridge.
+4. Click Open Anyway for JoyBridge-new.
 5. Enter your Mac login password if asked.
-6. Open JoyBridge again.
+6. Open JoyBridge-new again.
 
 Apple usually shows the Open Anyway button for about one hour after you try to open the app.
 
 Local tester fallback:
 
 ```sh
-xattr -dr com.apple.quarantine /Applications/JoyBridge.app
+xattr -dr com.apple.quarantine /Applications/JoyBridge-new.app
 ```
 
-Only use this fallback for a JoyBridge build you trust. It removes macOS's download quarantine flag for this app.
+Only use this fallback for a JoyBridge-new build you trust. It removes macOS's download quarantine flag for this app.
 
 ## Testing
 
 1. Pair a Joy-Con or Switch Pro Controller in macOS Bluetooth settings.
-2. Open JoyBridge and click `重新检测控制器`.
+2. Open JoyBridge-new and click `重新检测手柄`.
 3. Confirm that the `运行检查` panel shows the current version and the next required step.
 4. Confirm that the controller name appears.
 5. Click `锁定当前` to save the current controller as the target controller.
@@ -175,12 +177,12 @@ Only use this fallback for a JoyBridge build you trust. It removes macOS's downl
 10. Change a mapping in the list and confirm the new action works. Set the Key picker to `None/无` when you want a modifier-only binding such as `Control`.
 11. Hold a controller button and confirm it does not continuously repeat.
 12. Release and press again to confirm it fires once more.
-13. Close the main JoyBridge window and confirm JoyBridge remains in the menu bar.
-14. Use the JoyBridge menu bar item to pause/resume mappings, check status, reopen the window, rescan controllers, check Accessibility permission, or quit the app.
+13. Close the main JoyBridge-new window and confirm JoyBridge-new remains in the menu bar.
+14. Use the JoyBridge-new menu bar item to pause/resume mappings, check status, reopen the window, rescan controllers, check Accessibility permission, copy diagnostics, or quit the app.
 15. Click `暂停映射`, press controller buttons, and confirm `最近按键` still updates but no keyboard input is sent.
 16. Click `启用映射` and confirm mappings work again.
 17. Click `复制诊断信息` and confirm a readable summary is copied for feedback.
-18. Confirm JoyBridge uses the custom icon in Finder, Dock, and the Accessibility permission list.
+18. Confirm JoyBridge-new uses the custom icon in Finder, Dock, and the Accessibility permission list.
 
 After a target controller is locked, JoyBridge should only respond to that saved controller. If the target controller is not connected, JoyBridge should not automatically switch to another Bluetooth controller.
 
@@ -216,6 +218,9 @@ JoyBridge/
   JoyBridgeApp.swift
   ContentView.swift
   AppDelegate.swift
+  Diagnostics/
+    DiagnosticReport.swift
+    DiagnosticsService.swift
 
   Managers/
     ControllerManager.swift
@@ -224,12 +229,27 @@ JoyBridge/
 
   Models/
     ControllerButton.swift
+    ControllerDeviceFamily.swift
+    ControllerInputEvent.swift
     KeyboardKey.swift
     KeyModifier.swift
     KeyMapping.swift
     MappingAction.swift
+    MappingCatalog.swift
+    MappingProfile.swift
+    RuntimeState.swift
+
+  Persistence/
+    MappingStore.swift
+    UserDefaultsMappingStore.swift
+
+  Services/
+    KeyboardOutputService.swift
+    MappingService.swift
+    TargetControllerRule.swift
 
   Utilities/
+    AppIdentity.swift
     AppInfo.swift
     KeyboardEventSender.swift
 
@@ -239,14 +259,18 @@ JoyBridge/
     MappingRowView.swift
     PermissionStatusView.swift
     ControllerStatusView.swift
+    RuntimeUIComponents.swift
 
 Scripts/
   check-release-readiness.sh
   generate-app-icon.swift
   package-local-release.sh
+  run-domain-tests.sh
 
 FRIEND_TESTING.md
 RELEASE_CHECKLIST.md
+Tests/
+  DomainMappingTests.swift
 ```
 
 ## Roadmap
@@ -271,6 +295,8 @@ JoyBridge 是一个 macOS 原生生产力工具，用于把 Nintendo Joy-Con、S
 
 这个版本新增专门的朋友测试说明，让可信测试者不用阅读完整开发 README，也能完成安装、允许打开、授权、测试和反馈。它仍然是本地朋友测试版，不是经过 Apple 公证的正式公开发行版。详细更新请看 [FRIEND_TESTING.md](FRIEND_TESTING.md)、[CHANGELOG.md](CHANGELOG.md) 和 [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)。
 
+本轮重构测试 App 会显示为 `JoyBridge-new.app`，bundle id 是 `cc.afterlight.JoyBridgeNew`，这样可以和旧版 JoyBridge 分开授权、分开测试。
+
 ## MVP 功能
 
 - 使用 Swift、SwiftUI、AppKit 构建的 macOS 原生 App
@@ -280,17 +306,17 @@ JoyBridge 是一个 macOS 原生生产力工具，用于把 Nintendo Joy-Con、S
 - 使用 `UserDefaults` 保存自定义映射
 - 支持单键、纯修饰键映射和组合键，例如 `Command + C`、`Command + Shift + S`
 - 防止长按按钮时无限重复触发
-- 支持选择并锁定目标控制器，避免其他已连接手柄触发映射
-- 支持菜单栏入口，用于查看状态、重新打开 JoyBridge、重新检测控制器、检测辅助功能权限和退出 App
+- 支持选择并锁定目标手柄，避免其他已连接手柄触发映射
+- 支持菜单栏入口，用于查看状态、重新打开 JoyBridge-new、重新检测手柄、检测辅助功能权限、复制诊断信息和退出 App
 - 支持全局暂停/启用映射，用于临时停止所有键盘输出
-- 支持运行检查面板，用于汇总辅助功能、控制器连接、目标锁定和映射输出状态
+- 支持运行检查面板，用于汇总辅助功能、手柄连接、目标锁定和映射输出状态
 - 支持复制诊断信息，方便朋友测试时反馈问题
 - 支持自定义 macOS App 图标，并生成到 `Assets.xcassets`
 - 支持本地打包脚本，用于生成朋友测试版 `.zip`
 - 测试包内的 `READ-ME-FIRST.txt` 会显示打包时的 git commit、tag 和工作区 clean/dirty 状态
 - 支持专门的朋友测试说明，包含安装步骤和反馈模板
 - 支持发布准备检查脚本，用于后续 Developer ID 签名和 Apple 公证准备
-- 界面显示控制器状态、最近按下按钮和可编辑映射列表
+- 界面显示手柄状态、最近按下按钮和可编辑映射列表
 
 ## 支持的手柄按钮
 
@@ -307,7 +333,7 @@ JoyBridge 是一个 macOS 原生生产力工具，用于把 Nintendo Joy-Con、S
 - DPad Left
 - DPad Right
 
-注意：这些输入的前提是 Apple 的 `GameController.framework` 能从当前连接的控制器里暴露出对应按钮。当前朋友测试中，同时连接左右 Joy-Con 时，方向键、`A/B/X/Y` 和 `L/R/ZL/ZR` 都可以正常工作。只连接单只 `Joy-Con (L)` 或单只 `Joy-Con (R)` 时，面键/方向键可用，但 `L/R/ZL/ZR` 可能不会上报数值变化。
+注意：这些输入的前提是 Apple 的 `GameController.framework` 能从当前连接的手柄里暴露出对应按钮。当前朋友测试中，同时连接左右 Joy-Con 时，方向键、`A/B/X/Y` 和 `L/R/ZL/ZR` 都可以正常工作。只连接单只 `Joy-Con (L)` 或单只 `Joy-Con (R)` 时，面键/方向键可用，但 `L/R/ZL/ZR` 可能不会上报数值变化。
 
 ## 默认映射
 
@@ -332,7 +358,7 @@ JoyBridge 是一个 macOS 原生生产力工具，用于把 Nintendo Joy-Con、S
 - 建议使用 Xcode 16 或更高版本
 - 当前 MVP 优先面向 Apple Silicon
 - Nintendo Joy-Con、Switch Pro Controller 或兼容蓝牙手柄
-- 需要给 JoyBridge 授权 Accessibility 辅助功能权限
+- 需要给 JoyBridge-new 授权 Accessibility 辅助功能权限
 
 ## 本地运行
 
@@ -341,16 +367,16 @@ JoyBridge 是一个 macOS 原生生产力工具，用于把 Nintendo Joy-Con、S
 3. 选择 `JoyBridge` Target。
 4. 在 `Signing & Capabilities` 中选择你的 Apple Developer Team 或 Personal Team。
 5. 选择 `My Mac` 运行。
-6. 在 JoyBridge 中点击 `请求授权/打开设置`。
-7. 在 系统设置 > 隐私与安全性 > 辅助功能 中打开 JoyBridge。
-8. 回到 JoyBridge，点击 `重新检测权限`。
+6. 在 JoyBridge-new 中点击 `请求授权/打开设置`。
+7. 在 系统设置 > 隐私与安全性 > 辅助功能 中打开 JoyBridge-new。
+8. 回到 JoyBridge-new，点击 `重新检测权限`。
 
 本地开发阶段，App Sandbox 当前保持关闭，方便测试 Accessibility 和键盘事件发送。
 
 如果已经授权但 App 仍显示未授权，可以重置 Accessibility 记录后重新运行：
 
 ```sh
-tccutil reset Accessibility cc.afterlight.JoyBridge
+tccutil reset Accessibility cc.afterlight.JoyBridgeNew
 ```
 
 ## 生成本地测试包
@@ -364,7 +390,7 @@ Scripts/package-local-release.sh v0.10.0
 脚本会构建 Release 版本，并把测试包输出到：
 
 ```text
-dist/JoyBridge-v0.10.0-local-test.zip
+dist/JoyBridge-new-v0.10.0-local-test.zip
 ```
 
 重要提醒：
@@ -373,9 +399,9 @@ dist/JoyBridge-v0.10.0-local-test.zip
 - 请先看 `FRIEND_TESTING.md`，里面是最短安装和测试说明。
 - 它使用 Xcode 本地测试签名，不是用于公开分发的 Developer ID 签名。
 - 它还没有经过 Apple 公证，所以下载后打开时 macOS 可能会显示安全提醒。
-- 朋友可能需要右键点击 JoyBridge 后选择打开，或在 系统设置 > 隐私与安全性 中手动允许。
-- 建议顺序：先解压测试包，把 `JoyBridge.app` 移到“应用程序”，再打开，再授权辅助功能权限。
-- 必须给安装后的这个 JoyBridge 授权辅助功能权限。如果以前授权的是 Xcode 构建版本，需要在辅助功能设置里移除并重新添加 JoyBridge。
+- 朋友可能需要右键点击 JoyBridge-new 后选择打开，或在 系统设置 > 隐私与安全性 中手动允许。
+- 建议顺序：先解压测试包，把 `JoyBridge-new.app` 移到“应用程序”，再打开，再授权辅助功能权限。
+- 必须给安装后的这个 JoyBridge-new 授权辅助功能权限。如果以前授权的是旧 JoyBridge，可以按需保留旧记录，并单独添加 JoyBridge-new。
 - `spctl` 可能会对这个本地测试包显示 `rejected` 或代码签名内部错误。这表示它还不是经过 Apple 公证的正式公开发行版。
 - `READ-ME-FIRST.txt` 会显示打包时的 git commit、tag，以及工作区当时是 clean 还是 dirty。
 - `FRIEND_TESTING.md` 包含朋友安装说明和问题反馈模板。
@@ -394,41 +420,43 @@ Scripts/check-release-readiness.sh v0.10.0
 构建或安装 App 后，也可以检查具体的 App bundle：
 
 ```sh
-Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge.app
+Scripts/check-release-readiness.sh v0.10.0 /Applications/JoyBridge-new.app
 ```
+
+朋友测试通常使用 `/Applications/JoyBridge-new.app`。Hugh 本机当前稳定验证副本可能在 `/Users/hugh/Applications/JoyBridge-new.app`；不确定时，以 JoyBridge-new 界面里显示的当前 App 路径为准。
 
 对当前本地朋友测试包来说，出现一些警告是正常的。例如：App 还不是 Developer ID 签名，还没有配置公证凭证，也没有附加 Apple 公证票据。这些警告是在提醒我们：当前包适合测试，还不适合公开分发。
 
-### 如果 macOS 拦截 JoyBridge
+### 如果 macOS 拦截 JoyBridge-new
 
-如果看到类似 `Apple 无法验证 JoyBridge` 的弹窗，只要你确认这是可信的本地测试包，就不要点击移到废纸篓。
+如果看到类似 `Apple 无法验证 JoyBridge-new` 的弹窗，只要你确认这是可信的本地测试包，就不要点击移到废纸篓。
 
 推荐处理方式：
 
 1. 在弹窗里点击完成。
 2. 打开 系统设置 > 隐私与安全性。
 3. 滚动到安全性区域。
-4. 找到 JoyBridge，点击仍要打开。
+4. 找到 JoyBridge-new，点击仍要打开。
 5. 如果系统要求，输入你的 Mac 登录密码。
-6. 再次打开 JoyBridge。
+6. 再次打开 JoyBridge-new。
 
 Apple 通常只会在你尝试打开 App 后约一小时内显示仍要打开按钮。
 
 本地测试者备用方式：
 
 ```sh
-xattr -dr com.apple.quarantine /Applications/JoyBridge.app
+xattr -dr com.apple.quarantine /Applications/JoyBridge-new.app
 ```
 
-只有在你确认这个 JoyBridge 测试包可信时，才使用这个备用命令。它会移除这个 App 的 macOS 下载隔离标记。
+只有在你确认这个 JoyBridge-new 测试包可信时，才使用这个备用命令。它会移除这个 App 的 macOS 下载隔离标记。
 
 ## 测试方法
 
 1. 在 macOS 蓝牙设置中连接 Joy-Con 或 Switch Pro Controller。
-2. 打开 JoyBridge，点击 `重新检测控制器`。
+2. 打开 JoyBridge-new，点击 `重新检测手柄`。
 3. 确认 `运行检查` 面板显示当前版本和下一步需要处理的状态。
-4. 确认界面显示控制器名称。
-5. 点击 `锁定当前`，把当前控制器保存为目标控制器。
+4. 确认界面显示手柄名称。
+5. 点击 `锁定当前`，把当前手柄保存为目标手柄。
 6. 按手柄按钮，确认 `最近按键` 更新。
 7. 打开 TextEdit 或其他输入框。
 8. 按 `A` 测试 Space。
@@ -436,20 +464,20 @@ xattr -dr com.apple.quarantine /Applications/JoyBridge.app
 10. 修改映射列表中的按键，确认新的映射生效。需要纯修饰键映射时，可以把 Key 选择器设为 `None/无`，例如只触发 `Control`。
 11. 长按手柄按钮，确认不会连续疯狂触发。
 12. 松开后再次按下，确认可以再次触发。
-13. 关闭 JoyBridge 主窗口，确认 App 仍然留在菜单栏中。
-14. 使用菜单栏里的 JoyBridge 暂停/启用映射、查看状态、重新打开窗口、重新检测控制器、检测辅助功能权限或退出 App。
+13. 关闭 JoyBridge-new 主窗口，确认 App 仍然留在菜单栏中。
+14. 使用菜单栏里的 JoyBridge-new 暂停/启用映射、查看状态、重新打开窗口、重新检测手柄、检测辅助功能权限、复制诊断信息或退出 App。
 15. 点击 `暂停映射`，按手柄按钮，确认 `最近按键` 仍会更新，但不会发送键盘输入。
 16. 点击 `启用映射`，确认映射重新生效。
 17. 点击 `复制诊断信息`，确认可以复制一段可读的问题反馈摘要。
-18. 确认 JoyBridge 在 Finder、Dock 和辅助功能权限列表中显示自定义图标。
+18. 确认 JoyBridge-new 在 Finder、Dock 和辅助功能权限列表中显示自定义图标。
 
-锁定目标控制器后，JoyBridge 应该只响应这个已保存的控制器。如果目标控制器没有连接，JoyBridge 不应该自动切换到其他蓝牙手柄。
+锁定目标手柄后，JoyBridge-new 应该只响应这个已保存的手柄。如果目标手柄没有连接，JoyBridge-new 不应该自动切换到其他蓝牙手柄。
 
 测试 Joy-Con 时，建议同时连接左右两个 Joy-Con。请以 Xcode 控制台中的 `Button pressed`、`Mapping found`、`Keyboard event sent` 为准。如果只连接单只 Joy-Con 时按 `L/R/ZL/ZR` 没有出现 `Button pressed`，说明 macOS 当前没有通过 `GameController.framework` 暴露这些实体按键。
 
-菜单栏说明：菜单栏模式只表示关闭主窗口后 JoyBridge 继续运行。它还不会在 Mac 重启后自动启动。重启后仍需要手动打开 JoyBridge；测试结束时请从菜单栏里的 JoyBridge 选择退出。
+菜单栏说明：菜单栏模式只表示关闭主窗口后 JoyBridge-new 继续运行。它还不会在 Mac 重启后自动启动。重启后仍需要手动打开 JoyBridge-new；测试结束时请从菜单栏里的 JoyBridge-new 选择退出。
 
-暂停说明：暂停映射只会停止键盘输出。控制器检测、最近按键显示和目标控制器锁定仍会继续工作。暂停状态会保存，并在下次启动时恢复。
+暂停说明：暂停映射只会停止键盘输出。手柄检测、最近按键显示和目标手柄锁定仍会继续工作。暂停状态会保存，并在下次启动时恢复。
 
 ## 当前 MVP 范围
 
@@ -477,6 +505,9 @@ JoyBridge/
   JoyBridgeApp.swift
   ContentView.swift
   AppDelegate.swift
+  Diagnostics/
+    DiagnosticReport.swift
+    DiagnosticsService.swift
 
   Managers/
     ControllerManager.swift
@@ -485,12 +516,27 @@ JoyBridge/
 
   Models/
     ControllerButton.swift
+    ControllerDeviceFamily.swift
+    ControllerInputEvent.swift
     KeyboardKey.swift
     KeyModifier.swift
     KeyMapping.swift
     MappingAction.swift
+    MappingCatalog.swift
+    MappingProfile.swift
+    RuntimeState.swift
+
+  Persistence/
+    MappingStore.swift
+    UserDefaultsMappingStore.swift
+
+  Services/
+    KeyboardOutputService.swift
+    MappingService.swift
+    TargetControllerRule.swift
 
   Utilities/
+    AppIdentity.swift
     AppInfo.swift
     KeyboardEventSender.swift
 
@@ -500,20 +546,24 @@ JoyBridge/
     MappingRowView.swift
     PermissionStatusView.swift
     ControllerStatusView.swift
+    RuntimeUIComponents.swift
 
 Scripts/
   check-release-readiness.sh
   generate-app-icon.swift
   package-local-release.sh
+  run-domain-tests.sh
 
 FRIEND_TESTING.md
 RELEASE_CHECKLIST.md
+Tests/
+  DomainMappingTests.swift
 ```
 
 ## 后续方向
 
 - 映射 JSON 导入/导出
 - 多配置文件
-- 更完善的控制器型号诊断
+- 更完善的手柄型号诊断
 - Universal 构建
 - 经过 Apple 公证的 Developer ID 正式发布包

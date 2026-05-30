@@ -4,69 +4,99 @@ struct ControllerStatusView: View {
     @EnvironmentObject private var controllerManager: ControllerManager
 
     var body: some View {
-        GroupBox("控制器状态") {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Text("当前控制器：")
-                    Text(controllerManager.connectedControllerName ?? "未连接")
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Button {
-                        controllerManager.scanControllers()
-                    } label: {
-                        Label("重新检测控制器", systemImage: "gamecontroller")
-                    }
-                }
+        VStack(alignment: .leading, spacing: 20) {
+            SectionPanel(title: "手柄状态") {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 12) {
+                        StatusChip(
+                            level: controllerManager.isControllerConnected ? .ready : .warning,
+                            text: controllerManager.isControllerConnected ? "已连接" : "未连接"
+                        )
 
-                HStack {
-                    Text("目标控制器：")
-                    Picker("", selection: targetSelection) {
-                        Text("自动选择第一个")
-                            .tag(ControllerManager.automaticTargetID)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(controllerManager.connectedControllerName ?? "未检测到手柄")
+                                .font(.body.weight(.semibold))
 
-                        ForEach(controllerManager.availableControllers) { controller in
-                            Text(controller.displayName)
-                                .tag(controller.id)
+                            Text(controllerManager.isControllerConnected ? "JoyBridge 正在监听当前手柄输入。" : "请先在 macOS 蓝牙设置里连接手柄。")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
 
-                        if
-                            let selectedID = controllerManager.selectedTargetControllerID,
-                            let selectedName = controllerManager.selectedTargetControllerName,
-                            !controllerManager.availableControllers.contains(where: { $0.id == selectedID })
-                        {
-                            Text("\(selectedName)（未连接）")
-                                .tag(selectedID)
-                        }
-                    }
-                    .labelsHidden()
-                    .frame(maxWidth: 320)
+                        Spacer()
 
-                    Button {
-                        controllerManager.lockCurrentControllerAsTarget()
-                    } label: {
-                        Label("锁定当前", systemImage: "lock")
-                    }
-                    .disabled(!controllerManager.isControllerConnected)
-
-                    if controllerManager.isTargetControllerSelected {
                         Button {
-                            controllerManager.selectTargetController(id: nil)
+                            controllerManager.scanControllers()
                         } label: {
-                            Label("清除目标", systemImage: "xmark.circle")
+                            Label("重新检测手柄", systemImage: "gamecontroller")
                         }
                     }
-                }
 
-                targetStatusText
+                    HStack(spacing: 8) {
+                        Text("最近按键：")
+                            .foregroundStyle(.secondary)
 
-                HStack {
-                    Text("最近按键：")
-                    Text(controllerManager.latestPressedButton?.displayName ?? "无")
-                        .fontWeight(.semibold)
+                        Text(controllerManager.latestPressedButton?.displayName ?? "无")
+                            .fontWeight(.semibold)
+
+                        if let latestPressedAt = controllerManager.latestPressedAt {
+                            Text("· \(formatted(latestPressedAt))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 4)
+
+            SectionPanel(title: "目标锁定") {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 12) {
+                        StatusChip(level: targetLevel, text: targetChipText)
+
+                        Picker("目标手柄", selection: targetSelection) {
+                            Text("自动选择第一个")
+                                .tag(ControllerManager.automaticTargetID)
+
+                            ForEach(controllerManager.availableControllers) { controller in
+                                Text(controller.displayName)
+                                    .tag(controller.id)
+                            }
+
+                            if
+                                let selectedID = controllerManager.selectedTargetControllerID,
+                                let selectedName = controllerManager.selectedTargetControllerName,
+                                !controllerManager.availableControllers.contains(where: { $0.id == selectedID })
+                            {
+                                Text("\(selectedName)（未连接）")
+                                    .tag(selectedID)
+                            }
+                        }
+                        .frame(maxWidth: 360)
+
+                        Spacer()
+
+                        Button {
+                            controllerManager.lockCurrentControllerAsTarget()
+                        } label: {
+                            Label("锁定当前", systemImage: "lock")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(!controllerManager.isControllerConnected)
+
+                        if controllerManager.isTargetControllerSelected {
+                            Button {
+                                controllerManager.selectTargetController(id: nil)
+                            } label: {
+                                Label("清除目标", systemImage: "xmark.circle")
+                            }
+                        }
+                    }
+
+                    Text(targetStatusDescription)
+                        .font(.caption)
+                        .foregroundStyle(targetLevel == .warning ? .orange : .secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
         }
     }
 
@@ -85,22 +115,35 @@ struct ControllerStatusView: View {
         )
     }
 
-    @ViewBuilder
-    private var targetStatusText: some View {
+    private var targetLevel: RuntimeStatusLevel {
+        if controllerManager.isTargetControllerSelected {
+            return controllerManager.isSelectedTargetConnected ? .ready : .warning
+        }
+
+        return .warning
+    }
+
+    private var targetChipText: String {
+        if controllerManager.isTargetControllerSelected {
+            return controllerManager.isSelectedTargetConnected ? "已锁定" : "目标离线"
+        }
+
+        return "建议锁定"
+    }
+
+    private var targetStatusDescription: String {
         if controllerManager.isTargetControllerSelected {
             if controllerManager.isSelectedTargetConnected {
-                Text("目标状态：已锁定，只响应这个控制器")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("目标状态：目标控制器未连接，JoyBridge 不会响应其他手柄")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
+                return "锁定后，JoyBridge 只响应这个手柄。"
             }
-        } else {
-            Text("目标状态：自动选择第一个已连接控制器。建议测试稳定后点击“锁定当前”。")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+
+            return "目标手柄未连接时，JoyBridge 不会自动切换到其他手柄。"
         }
+
+        return "当前为自动选择第一个已连接手柄。建议测试稳定后点击“锁定当前”，避免响应其他蓝牙手柄。"
+    }
+
+    private func formatted(_ date: Date) -> String {
+        DateFormatter.localizedString(from: date, dateStyle: .none, timeStyle: .medium)
     }
 }

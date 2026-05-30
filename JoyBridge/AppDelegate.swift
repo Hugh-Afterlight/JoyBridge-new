@@ -14,7 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        print("Main window closed; JoyBridge remains available in the menu bar")
+        print("Main window closed; \(AppIdentity.displayName) remains available in the menu bar")
         return false
     }
 
@@ -23,7 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return true
         }
 
-        sender.windows.first(where: { $0.title == "JoyBridge" })?.makeKeyAndOrderFront(nil)
+        sender.windows.first(where: { $0.title == AppIdentity.displayName })?.makeKeyAndOrderFront(nil)
         return true
     }
 

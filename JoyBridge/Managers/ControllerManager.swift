@@ -36,6 +36,7 @@ final class ControllerManager: ObservableObject {
 
     @Published private(set) var connectedControllerName: String?
     @Published private(set) var latestPressedButton: ControllerButton?
+    @Published private(set) var latestPressedAt: Date?
     @Published private(set) var availableControllers: [ControllerDevice] = []
     @Published private(set) var selectedTargetControllerID: String?
     @Published private(set) var selectedTargetControllerName: String?
@@ -56,7 +57,8 @@ final class ControllerManager: ObservableObject {
         return availableControllers.contains { $0.id == selectedTargetControllerID }
     }
 
-    private let mappingManager: MappingManager
+    private let inputRuntime: any ControllerInputRuntime
+    private let targetControllerRule: TargetControllerRule
     private var activeController: GCController?
     private var notificationObservers: [NSObjectProtocol] = []
     private var pressedButtons = Set<ControllerButton>()
@@ -68,14 +70,19 @@ final class ControllerManager: ObservableObject {
     private var polledAxisInputs: [PolledAxisInput] = []
     private var activeDiagnosticButtons = Set<String>()
     private var activeDiagnosticAxes = Set<String>()
+    private let targetControllerStore: TargetControllerStore
 
-    private static let targetControllerIDDefaultsKey = "joybridge.targetControllerID"
-    private static let targetControllerNameDefaultsKey = "joybridge.targetControllerName"
-
-    init(mappingManager: MappingManager) {
-        self.mappingManager = mappingManager
-        selectedTargetControllerID = UserDefaults.standard.string(forKey: Self.targetControllerIDDefaultsKey)
-        selectedTargetControllerName = UserDefaults.standard.string(forKey: Self.targetControllerNameDefaultsKey)
+    init(
+        inputRuntime: any ControllerInputRuntime,
+        targetControllerRule: TargetControllerRule = TargetControllerRule(),
+        targetControllerStore: TargetControllerStore? = nil
+    ) {
+        self.inputRuntime = inputRuntime
+        self.targetControllerRule = targetControllerRule
+        self.targetControllerStore = targetControllerStore ?? UserDefaultsTargetControllerStore()
+        let storedTargetController = self.targetControllerStore.loadTargetController()
+        selectedTargetControllerID = storedTargetController?.id
+        selectedTargetControllerName = storedTargetController?.name
         GCController.shouldMonitorBackgroundEvents = true
         setupNotifications()
         scanControllers()
@@ -115,14 +122,12 @@ final class ControllerManager: ObservableObject {
                 ?? id
             selectedTargetControllerID = id
             selectedTargetControllerName = displayName
-            UserDefaults.standard.set(id, forKey: Self.targetControllerIDDefaultsKey)
-            UserDefaults.standard.set(displayName, forKey: Self.targetControllerNameDefaultsKey)
+            targetControllerStore.saveTargetController(id: id, name: displayName)
             print("Target controller selected: \(displayName)")
         } else {
             selectedTargetControllerID = nil
             selectedTargetControllerName = nil
-            UserDefaults.standard.removeObject(forKey: Self.targetControllerIDDefaultsKey)
-            UserDefaults.standard.removeObject(forKey: Self.targetControllerNameDefaultsKey)
+            targetControllerStore.clearTargetController()
             print("Target controller cleared; automatic controller selection enabled")
         }
 
@@ -138,8 +143,10 @@ final class ControllerManager: ObservableObject {
         let id = controllerIdentifier(for: activeController)
         selectedTargetControllerID = id
         selectedTargetControllerName = controllerDisplayName(for: activeController)
-        UserDefaults.standard.set(id, forKey: Self.targetControllerIDDefaultsKey)
-        UserDefaults.standard.set(selectedTargetControllerName, forKey: Self.targetControllerNameDefaultsKey)
+        targetControllerStore.saveTargetController(
+            id: id,
+            name: selectedTargetControllerName ?? id
+        )
         print("Target controller locked: \(selectedTargetControllerName ?? id)")
         scanControllers()
     }
@@ -213,7 +220,10 @@ final class ControllerManager: ObservableObject {
         }
 
         return controllers.first { controller in
-            controllerIdentifier(for: controller) == selectedTargetControllerID
+            targetControllerRule.accepts(
+                controllerID: controllerIdentifier(for: controller),
+                selectedTargetControllerID: selectedTargetControllerID
+            )
         }
     }
 
@@ -223,7 +233,7 @@ final class ControllerManager: ObservableObject {
         }
 
         stopPhysicalInputPolling()
-        mappingManager.releaseAllHeldModifiers()
+        inputRuntime.releaseAllHeldOutputs()
         activeController = controller
         connectedControllerName = controller.vendorName ?? "Unknown Controller"
         usesLeftJoyConDirectionalFaceButtonCorrection = isLeftJoyCon(controller)
@@ -268,10 +278,11 @@ final class ControllerManager: ObservableObject {
         }
 
         stopPhysicalInputPolling()
-        mappingManager.releaseAllHeldModifiers()
+        inputRuntime.releaseAllHeldOutputs()
         activeController = nil
         connectedControllerName = nil
         latestPressedButton = nil
+        latestPressedAt = nil
         usesLeftJoyConDirectionalFaceButtonCorrection = false
         pressedButtons.removeAll()
     }
@@ -551,16 +562,46 @@ final class ControllerManager: ObservableObject {
 
             pressedButtons.insert(button)
             latestPressedButton = button
+            latestPressedAt = Date()
             print("Button pressed [\(profile)]: \(button.displayName)")
-            mappingManager.handleButtonPress(button)
+            sendInputEvent(button: button, phase: .pressed, profile: profile)
         } else {
             guard pressedButtons.remove(button) != nil else {
                 return
             }
 
             print("Button released [\(profile)]: \(button.displayName)")
-            mappingManager.handleButtonRelease(button)
+            sendInputEvent(button: button, phase: .released, profile: profile)
         }
+    }
+
+    private func sendInputEvent(
+        button: ControllerButton,
+        phase: ControllerInputPhase,
+        profile: String
+    ) {
+        guard let activeController else {
+            return
+        }
+
+        let controllerID = controllerIdentifier(for: activeController)
+        guard targetControllerRule.accepts(
+            controllerID: controllerID,
+            selectedTargetControllerID: selectedTargetControllerID
+        ) else {
+            print("Ignored input from non-target controller: \(controllerDisplayName(for: activeController))")
+            return
+        }
+
+        inputRuntime.handleControllerInput(
+            ControllerInputEvent(
+                controllerID: controllerID,
+                controllerName: controllerDisplayName(for: activeController),
+                button: button,
+                phase: phase,
+                sourceProfile: profile
+            )
+        )
     }
 
     private func startPhysicalInputPolling() {

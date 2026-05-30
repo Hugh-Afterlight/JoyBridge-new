@@ -2,74 +2,67 @@ import Combine
 import Foundation
 
 @MainActor
-final class MappingManager: ObservableObject {
+final class MappingManager: ObservableObject, ControllerInputHandling, OutputStateResetting {
     @Published private(set) var mappings: [KeyMapping] = []
     @Published private(set) var isMappingPaused: Bool
+    @Published private(set) var latestOutputResult = "尚未输出"
 
-    private let userDefaultsKey = "joybridge.keyMappings"
-    private let mappingPausedDefaultsKey = "joybridge.mappingPaused"
-    private let userDefaults: UserDefaults
-    private let keyboardEventSender: KeyboardEventSender
-    private let accessibilityPermissionManager: AccessibilityPermissionManager
+    private var profile: MappingProfile
+    private let mappingStore: MappingStore
+    private let pauseStateStore: PauseStateStore
+    private let keyboardOutputService: any KeyboardOutputService
+    private let mappingService: MappingService
+    private let accessibilityPermissionManager: any AccessibilityPermissionProviding
     private var activeModifierHolds: [ControllerButton: [KeyModifier]] = [:]
 
     init(
-        accessibilityPermissionManager: AccessibilityPermissionManager,
-        userDefaults: UserDefaults = .standard,
-        keyboardEventSender: KeyboardEventSender? = nil
+        accessibilityPermissionManager: any AccessibilityPermissionProviding,
+        keyboardOutputService: (any KeyboardOutputService)? = nil,
+        mappingService: MappingService = MappingService(),
+        mappingStore: MappingStore? = nil,
+        pauseStateStore: PauseStateStore? = nil
     ) {
         self.accessibilityPermissionManager = accessibilityPermissionManager
-        self.userDefaults = userDefaults
-        self.keyboardEventSender = keyboardEventSender ?? KeyboardEventSender()
-        isMappingPaused = userDefaults.bool(forKey: mappingPausedDefaultsKey)
+        self.keyboardOutputService = keyboardOutputService ?? KeyboardEventSender()
+        self.mappingService = mappingService
+        self.mappingStore = mappingStore ?? UserDefaultsMappingStore()
+        self.pauseStateStore = pauseStateStore ?? UserDefaultsPauseStateStore()
+        profile = MappingProfile.defaultProfile()
+        isMappingPaused = self.pauseStateStore.loadMappingPaused()
 
         print("Global mapping pause state loaded: \(isMappingPaused ? "paused" : "enabled")")
-        loadMappings()
+        loadProfile()
     }
 
     func mapping(for button: ControllerButton) -> KeyMapping? {
-        mappings.first { $0.controllerButton == button }
+        mappingService.mapping(for: button, in: profile)
     }
 
     func updateMapping(_ mapping: KeyMapping) {
         releaseModifierHold(for: mapping.controllerButton)
 
-        let normalizedMapping = mapping.normalized()
-        var updatedMappings = mappings
-
-        if let index = updatedMappings.firstIndex(where: { $0.controllerButton == normalizedMapping.controllerButton }) {
-            updatedMappings[index] = normalizedMapping
-        } else {
-            updatedMappings.append(normalizedMapping)
-        }
-
-        mappings = normalizedMappings(updatedMappings)
-        saveMappings()
+        profile = profile.updatingMapping(mapping)
+        mappings = profile.mappings
+        saveProfile()
     }
 
     func handleButtonPress(_ button: ControllerButton) {
-        guard !isMappingPaused else {
-            print("Mapping skipped because global pause is enabled: \(button.displayName)")
-            return
-        }
+        let decision = mappingService.executionDecision(
+            for: button,
+            in: profile,
+            context: MappingExecutionContext(
+                isPaused: isMappingPaused,
+                isAccessibilityTrusted: accessibilityPermissionManager.isTrusted
+            )
+        )
 
-        guard let mapping = mapping(for: button) else {
-            print("Mapping missing: \(button.displayName)")
-            return
+        switch decision {
+        case let .execute(mapping, action):
+            print("Mapping found: \(mapping.previewDescription)")
+            perform(action, for: button)
+        case let .skip(reason):
+            logSkippedMapping(reason, button: button)
         }
-
-        guard mapping.isEnabled else {
-            print("Mapping disabled: \(button.displayName)")
-            return
-        }
-
-        guard accessibilityPermissionManager.isTrusted else {
-            print("Accessibility permission missing")
-            return
-        }
-
-        print("Mapping found: \(mapping.previewDescription)")
-        perform(mapping.action, for: button)
     }
 
     func handleButtonRelease(_ button: ControllerButton) {
@@ -82,7 +75,7 @@ final class MappingManager: ObservableObject {
         }
 
         isMappingPaused = isPaused
-        userDefaults.set(isPaused, forKey: mappingPausedDefaultsKey)
+        pauseStateStore.saveMappingPaused(isPaused)
 
         if isPaused {
             releaseAllHeldModifiers()
@@ -101,35 +94,45 @@ final class MappingManager: ObservableObject {
         guard !heldModifiers.isEmpty else { return }
 
         activeModifierHolds.removeAll()
-        keyboardEventSender.sendModifierKeyUp(modifiers: heldModifiers)
-    }
-
-    private func loadMappings() {
-        guard let data = userDefaults.data(forKey: userDefaultsKey) else {
-            mappings = Self.defaultMappings()
-            print("Default mappings created")
-            saveMappings()
-            return
-        }
-
-        do {
-            let decodedMappings = try JSONDecoder().decode([KeyMapping].self, from: data)
-            mappings = normalizedMappings(decodedMappings)
-            print("Mappings loaded from UserDefaults")
-        } catch {
-            mappings = Self.defaultMappings()
-            print("Default mappings created")
-            saveMappings()
+        if keyboardOutputService.sendModifierKeyUp(modifiers: heldModifiers) {
+            recordOutputResult("已释放修饰键：\(KeyMapping.actionDisplayName(key: nil, modifiers: heldModifiers))")
+        } else {
+            recordOutputResult("释放修饰键失败：\(KeyMapping.actionDisplayName(key: nil, modifiers: heldModifiers))")
         }
     }
 
-    private func saveMappings() {
+    func handleControllerInput(_ event: ControllerInputEvent) {
+        switch event.phase {
+        case .pressed:
+            handleButtonPress(event.button)
+        case .released:
+            handleButtonRelease(event.button)
+        }
+    }
+
+    func releaseAllHeldOutputs() {
+        releaseAllHeldModifiers()
+    }
+
+    private func loadProfile() {
         do {
-            let data = try JSONEncoder().encode(mappings)
-            userDefaults.set(data, forKey: userDefaultsKey)
-            print("Mappings saved")
+            profile = try mappingStore.loadProfile().normalized()
+            mappings = profile.mappings
+            print("Mapping profile loaded: \(profile.name)")
         } catch {
-            print("Mappings save failed: \(error.localizedDescription)")
+            profile = MappingProfile.defaultProfile()
+            mappings = profile.mappings
+            print("Default mapping profile created after load failure: \(error.localizedDescription)")
+            saveProfile()
+        }
+    }
+
+    private func saveProfile() {
+        do {
+            try mappingStore.saveProfile(profile)
+            print("Mapping profile saved: \(profile.name)")
+        } catch {
+            print("Mapping profile save failed: \(error.localizedDescription)")
         }
     }
 
@@ -137,11 +140,16 @@ final class MappingManager: ObservableObject {
         switch action {
         case let .keyboard(key, modifiers):
             let effectiveModifiers = modifiersIncludingActiveHolds(modifiers)
-            keyboardEventSender.sendKeyCombo(key: key, modifiers: effectiveModifiers)
+            if keyboardOutputService.sendKeyCombo(key: key, modifiers: effectiveModifiers) {
+                recordOutputResult("已输出：\(KeyMapping.actionDisplayName(key: key, modifiers: effectiveModifiers))")
+            } else {
+                recordOutputResult("输出失败：\(KeyMapping.actionDisplayName(key: key, modifiers: effectiveModifiers))")
+            }
         case let .modifierOnly(modifiers):
             startModifierHold(modifiers, for: button)
         case .none:
             print("Mapping has no action: \(button.displayName)")
+            recordOutputResult("未输出：\(button.displayName) 无动作")
         }
     }
 
@@ -156,10 +164,15 @@ final class MappingManager: ObservableObject {
 
         guard !modifiersToPress.isEmpty else {
             print("Modifier hold already active: \(KeyMapping.actionDisplayName(key: nil, modifiers: orderedModifiers))")
+            recordOutputResult("修饰键保持中：\(KeyMapping.actionDisplayName(key: nil, modifiers: orderedModifiers))")
             return
         }
 
-        keyboardEventSender.sendModifierKeyDown(modifiers: modifiersToPress)
+        if keyboardOutputService.sendModifierKeyDown(modifiers: modifiersToPress) {
+            recordOutputResult("已按下修饰键：\(KeyMapping.actionDisplayName(key: nil, modifiers: modifiersToPress))")
+        } else {
+            recordOutputResult("按下修饰键失败：\(KeyMapping.actionDisplayName(key: nil, modifiers: modifiersToPress))")
+        }
     }
 
     private func releaseModifierHold(for button: ControllerButton) {
@@ -172,42 +185,46 @@ final class MappingManager: ObservableObject {
 
         guard !modifiersToRelease.isEmpty else {
             print("Modifier hold released, modifiers still held by another button")
+            recordOutputResult("修饰键仍被其他按钮保持")
             return
         }
 
-        keyboardEventSender.sendModifierKeyUp(modifiers: modifiersToRelease)
+        if keyboardOutputService.sendModifierKeyUp(modifiers: modifiersToRelease) {
+            recordOutputResult("已释放修饰键：\(KeyMapping.actionDisplayName(key: nil, modifiers: modifiersToRelease))")
+        } else {
+            recordOutputResult("释放修饰键失败：\(KeyMapping.actionDisplayName(key: nil, modifiers: modifiersToRelease))")
+        }
     }
 
     private func modifiersIncludingActiveHolds(_ modifiers: [KeyModifier]) -> [KeyModifier] {
         KeyModifier.orderedUnique(from: activeModifierHolds.values.flatMap { $0 } + modifiers)
     }
 
-    private func normalizedMappings(_ sourceMappings: [KeyMapping]) -> [KeyMapping] {
-        let defaults = Self.defaultMappings()
-
-        return ControllerButton.mappableButtons.compactMap { button in
-            if let mapping = sourceMappings.first(where: { $0.controllerButton == button }) {
-                return mapping.normalized()
-            }
-
-            return defaults.first { $0.controllerButton == button }
+    private func logSkippedMapping(_ reason: MappingSkipReason, button: ControllerButton) {
+        switch reason {
+        case .paused:
+            print("Mapping skipped because global pause is enabled: \(button.displayName)")
+            recordOutputResult("未输出：映射已暂停（\(button.displayName)）")
+        case .missingMapping:
+            print("Mapping missing: \(button.displayName)")
+            recordOutputResult("未输出：缺少映射（\(button.displayName)）")
+        case .disabled:
+            print("Mapping disabled: \(button.displayName)")
+            recordOutputResult("未输出：映射已禁用（\(button.displayName)）")
+        case .missingAccessibilityPermission:
+            print("Accessibility permission missing")
+            recordOutputResult("未输出：缺少辅助功能权限")
+        case .noAction:
+            print("Mapping has no action: \(button.displayName)")
+            recordOutputResult("未输出：\(button.displayName) 无动作")
         }
     }
 
+    private func recordOutputResult(_ result: String) {
+        latestOutputResult = result
+    }
+
     static func defaultMappings() -> [KeyMapping] {
-        [
-            KeyMapping(controllerButton: .a, key: .space),
-            KeyMapping(controllerButton: .b, key: .escape),
-            KeyMapping(controllerButton: .x, key: .c, modifiers: [.command]),
-            KeyMapping(controllerButton: .y, key: .v, modifiers: [.command]),
-            KeyMapping(controllerButton: .leftShoulder, key: .leftArrow, modifiers: [.command]),
-            KeyMapping(controllerButton: .rightShoulder, key: .rightArrow, modifiers: [.command]),
-            KeyMapping(controllerButton: .leftTrigger, key: .pageUp),
-            KeyMapping(controllerButton: .rightTrigger, key: .pageDown),
-            KeyMapping(controllerButton: .dpadUp, key: .upArrow),
-            KeyMapping(controllerButton: .dpadDown, key: .downArrow),
-            KeyMapping(controllerButton: .dpadLeft, key: .leftArrow),
-            KeyMapping(controllerButton: .dpadRight, key: .rightArrow)
-        ]
+        MappingCatalog.defaultMappings()
     }
 }
