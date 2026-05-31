@@ -2,13 +2,14 @@
 
 This document explains the path from the current local friend-test builds to a future public macOS release.
 
-JoyBridge is currently distributed as a local test `.zip`. A public macOS release needs a different signing and notarization process.
+JoyBridge is currently distributed as local test `.dmg` and `.zip` packages. A public macOS release needs a different signing and notarization process.
 
 ## Current Status
 
 - Current test version: `v0.10.0`
 - App bundle: `JoyBridge-new.app`
 - Bundle identifier: `cc.afterlight.JoyBridgeNew`
+- Local DMG package: `JoyBridge-new-v0.10.0-local-test.dmg`
 - Local friend-test package: supported
 - Developer ID public distribution: not ready yet
 - Apple notarization: not performed yet
@@ -48,7 +49,7 @@ Expected warnings before a real public release:
 - Developer ID Application certificate may be missing.
 - `JOYBRIDGE_NOTARY_PROFILE` may be missing.
 - Git tag may not match until the version tag is created.
-- Local test apps may be ad-hoc signed, not Gatekeeper accepted, and not stapled.
+- Local test apps or DMGs may be ad-hoc signed, not Gatekeeper accepted, and not stapled.
 
 ## Requirements For A Public Developer ID Release
 
@@ -105,13 +106,14 @@ The readiness script only checks whether this environment variable is set. It do
 
 这个文件说明 JoyBridge 从“本地朋友测试包”走向“公开 macOS 安装包”需要做什么。
 
-当前 JoyBridge 仍然是本地测试 `.zip`。真正公开分发时，需要 Developer ID 签名和 Apple 公证。
+当前 JoyBridge 通过本地测试 `.dmg` 和 `.zip` 分发。真正公开分发时，需要 Developer ID 签名和 Apple 公证。
 
 ### 当前状态
 
 - 当前测试版本：`v0.10.0`
 - App bundle：`JoyBridge-new.app`
 - Bundle identifier：`cc.afterlight.JoyBridgeNew`
+- 本地 DMG 测试包：`JoyBridge-new-v0.10.0-local-test.dmg`
 - 本地朋友测试包：支持
 - Developer ID 公开分发：尚未完成
 - Apple 公证：尚未执行
@@ -151,7 +153,7 @@ Scripts/check-release-readiness.sh --strict v0.10.0
 - 机器上还没有 `Developer ID Application` 证书。
 - 当前 shell 没有设置 `JOYBRIDGE_NOTARY_PROFILE`。
 - 还没有创建和版本匹配的 git tag。
-- 本地测试 App 可能是 ad-hoc 签名、未被 Gatekeeper 接受、也没有附加公证票据。
+- 本地测试 App 或 DMG 可能是 ad-hoc 签名、未被 Gatekeeper 接受、也没有附加公证票据。
 
 ### 公开 Developer ID 发布需要什么
 

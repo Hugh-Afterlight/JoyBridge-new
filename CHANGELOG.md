@@ -1,5 +1,51 @@
 # Changelog
 
+## v0.10.0-dmg - 2026-05-31
+
+### English
+
+This packaging update adds a local DMG for friend testing. The app code and visible app version remain `v0.10.0`.
+
+Changed:
+
+- Added `Scripts/package-local-dmg.sh`.
+- The DMG includes `JoyBridge-new.app`, an `Applications` shortcut, `READ-ME-FIRST.txt`, `FRIEND_TESTING.md`, `README.md`, `CHANGELOG.md`, and `RELEASE_CHECKLIST.md`.
+- Updated README, friend testing instructions, and release checklist to recommend the DMG while keeping the zip package as a fallback.
+
+Validation:
+
+- `Scripts/package-local-dmg.sh v0.10.0` builds the Release app and creates `dist/JoyBridge-new-v0.10.0-local-test.dmg`.
+- `hdiutil verify` passes for the generated DMG.
+- The mounted DMG contains the app, Applications shortcut, and documentation.
+
+Known limitations:
+
+- This DMG is still a local friend-test package.
+- It is not Developer ID signed or Apple notarized.
+- Users still need to manually approve opening the app and grant Accessibility permission.
+
+### 中文
+
+本次打包更新新增朋友测试用 DMG。App 代码和可见版本号仍保持 `v0.10.0`。
+
+本次更新：
+
+- 新增 `Scripts/package-local-dmg.sh`。
+- DMG 内包含 `JoyBridge-new.app`、`Applications` 快捷方式、`READ-ME-FIRST.txt`、`FRIEND_TESTING.md`、`README.md`、`CHANGELOG.md` 和 `RELEASE_CHECKLIST.md`。
+- 更新 README、朋友测试说明和发布清单，推荐优先下载 DMG，同时保留 zip 作为备用。
+
+验证结果：
+
+- `Scripts/package-local-dmg.sh v0.10.0` 可以构建 Release app，并生成 `dist/JoyBridge-new-v0.10.0-local-test.dmg`。
+- 生成的 DMG 通过 `hdiutil verify`。
+- 挂载后的 DMG 包含 App、Applications 快捷方式和说明文档。
+
+已知限制：
+
+- 这个 DMG 仍然是本地朋友测试包。
+- 它还不是 Developer ID 签名或 Apple 公证的正式发布包。
+- 用户仍需要手动允许打开 App，并授权辅助功能权限。
+
 ## v0.10.0-refactor - 2026-05-31
 
 ### English

@@ -25,7 +25,7 @@ This refactor test build appears as `JoyBridge-new.app` with bundle id `cc.after
 - Readiness check panel for Accessibility, controller connection, target lock, and mapping output status
 - Copyable diagnostic summary for easier friend-test feedback
 - Custom macOS App icon generated into `Assets.xcassets`
-- Local packaging script for creating friend-test `.zip` builds
+- Local packaging scripts for creating friend-test `.dmg` and `.zip` builds
 - Package source summary with git commit, tag, and clean/dirty status in `READ-ME-FIRST.txt`
 - Dedicated friend-testing guide with install steps and feedback template
 - Release-readiness checker for future Developer ID signing and Apple notarization preparation
@@ -94,7 +94,21 @@ tccutil reset Accessibility cc.afterlight.JoyBridgeNew
 
 ## Create a Local Test Package
 
-After the app works from Xcode, you can create a local friend-test package:
+After the app works from Xcode, you can create a local friend-test DMG:
+
+```sh
+Scripts/package-local-dmg.sh v0.10.0
+```
+
+The script builds the Release app and writes the DMG to:
+
+```text
+dist/JoyBridge-new-v0.10.0-local-test.dmg
+```
+
+Open the DMG, drag `JoyBridge-new.app` to `Applications`, then open it and grant Accessibility permission.
+
+The zip package is still available as a fallback:
 
 ```sh
 Scripts/package-local-release.sh v0.10.0
@@ -112,8 +126,9 @@ Important notes:
 - Start with `FRIEND_TESTING.md` for the shortest install and testing guide.
 - It is signed by Xcode for local testing, not with Developer ID for public distribution.
 - It is not notarized by Apple yet, so macOS may show a security warning when opening it after download.
+- Friends should download the DMG first when available; the zip is only a fallback.
 - Friends may need to right-click JoyBridge-new and choose Open, or approve it in System Settings > Privacy & Security.
-- Recommended order: unzip the package, move `JoyBridge-new.app` to `/Applications`, open it, then grant Accessibility permission.
+- Recommended order: open the DMG, drag `JoyBridge-new.app` to `/Applications`, open it, then grant Accessibility permission.
 - Accessibility permission must be granted to the installed copy of JoyBridge-new. If an older JoyBridge build was authorized before, keep it only if needed and add JoyBridge-new separately in Accessibility settings.
 - `spctl` may report `rejected` or an internal code-signing error for this local package. That means it is not a notarized public release.
 - `READ-ME-FIRST.txt` includes the git commit, tag, and whether the worktree was clean or dirty when packaged.
@@ -264,6 +279,7 @@ JoyBridge/
 Scripts/
   check-release-readiness.sh
   generate-app-icon.swift
+  package-local-dmg.sh
   package-local-release.sh
   run-domain-tests.sh
 
@@ -312,7 +328,7 @@ JoyBridge 是一个 macOS 原生生产力工具，用于把 Nintendo Joy-Con、S
 - 支持运行检查面板，用于汇总辅助功能、手柄连接、目标锁定和映射输出状态
 - 支持复制诊断信息，方便朋友测试时反馈问题
 - 支持自定义 macOS App 图标，并生成到 `Assets.xcassets`
-- 支持本地打包脚本，用于生成朋友测试版 `.zip`
+- 支持本地打包脚本，用于生成朋友测试版 `.dmg` 和 `.zip`
 - 测试包内的 `READ-ME-FIRST.txt` 会显示打包时的 git commit、tag 和工作区 clean/dirty 状态
 - 支持专门的朋友测试说明，包含安装步骤和反馈模板
 - 支持发布准备检查脚本，用于后续 Developer ID 签名和 Apple 公证准备
@@ -381,7 +397,21 @@ tccutil reset Accessibility cc.afterlight.JoyBridgeNew
 
 ## 生成本地测试包
 
-确认 App 可以从 Xcode 正常运行后，可以生成一个给朋友测试的本地包：
+确认 App 可以从 Xcode 正常运行后，可以生成一个给朋友测试的 DMG：
+
+```sh
+Scripts/package-local-dmg.sh v0.10.0
+```
+
+脚本会构建 Release 版本，并把 DMG 输出到：
+
+```text
+dist/JoyBridge-new-v0.10.0-local-test.dmg
+```
+
+打开 DMG，把 `JoyBridge-new.app` 拖到 `Applications`，再打开并授权辅助功能权限。
+
+zip 包仍作为备用方式保留：
 
 ```sh
 Scripts/package-local-release.sh v0.10.0
@@ -399,8 +429,9 @@ dist/JoyBridge-new-v0.10.0-local-test.zip
 - 请先看 `FRIEND_TESTING.md`，里面是最短安装和测试说明。
 - 它使用 Xcode 本地测试签名，不是用于公开分发的 Developer ID 签名。
 - 它还没有经过 Apple 公证，所以下载后打开时 macOS 可能会显示安全提醒。
+- 有 DMG 时建议朋友优先下载 DMG；zip 只作为备用。
 - 朋友可能需要右键点击 JoyBridge-new 后选择打开，或在 系统设置 > 隐私与安全性 中手动允许。
-- 建议顺序：先解压测试包，把 `JoyBridge-new.app` 移到“应用程序”，再打开，再授权辅助功能权限。
+- 建议顺序：打开 DMG，把 `JoyBridge-new.app` 拖到“应用程序”，再打开，再授权辅助功能权限。
 - 必须给安装后的这个 JoyBridge-new 授权辅助功能权限。如果以前授权的是旧 JoyBridge，可以按需保留旧记录，并单独添加 JoyBridge-new。
 - `spctl` 可能会对这个本地测试包显示 `rejected` 或代码签名内部错误。这表示它还不是经过 Apple 公证的正式公开发行版。
 - `READ-ME-FIRST.txt` 会显示打包时的 git commit、tag，以及工作区当时是 clean 还是 dirty。
@@ -551,6 +582,7 @@ JoyBridge/
 Scripts/
   check-release-readiness.sh
   generate-app-icon.swift
+  package-local-dmg.sh
   package-local-release.sh
   run-domain-tests.sh
 
